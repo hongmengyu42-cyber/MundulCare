@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URI;
 
 @Configuration
@@ -44,7 +47,9 @@ public class DatabaseConfig {
                 "DB_URL"
         );
 
-        if (rawDbUrl == null || rawDbUrl.isBlank()) {
+        if (rawDbUrl != null && !rawDbUrl.isBlank()) {
+            configureFromCloudUrl(config, rawDbUrl.trim());
+        } else {
             // Check composite PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD (Railway, etc.)
             String pgHost = findEnv("PGHOST", "POSTGRES_HOST", "DB_HOST");
             if (pgHost != null && !pgHost.isBlank()) {
@@ -57,17 +62,53 @@ public class DatabaseConfig {
                 String pgPass = findEnv("PGPASSWORD", "POSTGRES_PASSWORD", "DB_PASSWORD");
                 if (pgPass == null) pgPass = password;
 
-                rawDbUrl = "jdbc:postgresql://" + pgHost + ":" + pgPort + "/" + pgDb;
-                username = pgUser;
-                password = pgPass;
-            } else if (datasourceUrl != null && !datasourceUrl.isBlank()) {
-                rawDbUrl = datasourceUrl;
+                String jdbcUrl = "jdbc:postgresql://" + pgHost + ":" + pgPort + "/" + pgDb;
+                config.setJdbcUrl(jdbcUrl);
+                config.setUsername(pgUser);
+                config.setPassword(pgPass);
+                config.setDriverClassName("org.postgresql.Driver");
+                log.info("Configured PostgreSQL DataSource from PGHOST env: host={}:{}, database={}", pgHost, pgPort, pgDb);
+            } else if (datasourceUrl != null && !datasourceUrl.isBlank() && !datasourceUrl.contains("localhost:5432")) {
+                config.setJdbcUrl(datasourceUrl);
+                config.setUsername(username);
+                config.setPassword(password);
+                config.setDriverClassName(driverClassName);
+                log.info("Configured PostgreSQL DataSource from custom datasourceUrl: {}", sanitizeJdbcUrl(datasourceUrl));
             } else {
-                rawDbUrl = "jdbc:postgresql://localhost:5432/hospital";
+                // No external cloud database URL was supplied in environment.
+                // Check if a local PostgreSQL daemon is actually responding on localhost:5432
+                if (isHostReachable("localhost", 5432, 500)) {
+                    config.setJdbcUrl("jdbc:postgresql://localhost:5432/hospital");
+                    config.setUsername(username);
+                    config.setPassword(password);
+                    config.setDriverClassName("org.postgresql.Driver");
+                    log.info("Connected to local PostgreSQL daemon at localhost:5432.");
+                } else {
+                    // Running in a cloud container (or environment without local postgres running).
+                    // Fall back to embedded database with PostgreSQL compatibility mode so the container boots up successfully!
+                    new File("data").mkdirs();
+                    String h2Url = "jdbc:h2:file:./data/hospital;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1";
+                    config.setJdbcUrl(h2Url);
+                    config.setDriverClassName("org.h2.Driver");
+                    config.setUsername("sa");
+                    config.setPassword("");
+                    log.warn("⚠️ [DATABASE FALLBACK] No cloud PostgreSQL URL was provided and no local Postgres is active on localhost:5432.");
+                    log.warn("👉 Booting with embedded persistent storage ({}) to ensure successful deployment. Set the DATABASE_URL environment variable anytime to switch to PostgreSQL.", h2Url);
+                }
             }
         }
 
-        // Auto-convert standard cloud URL formats (e.g. postgres:// or postgresql://) to JDBC
+        // Configure reasonable Hikari pool settings for production
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(20000);
+        config.setIdleTimeout(300000);
+        config.setMaxLifetime(1200000);
+
+        return new HikariDataSource(config);
+    }
+
+    private void configureFromCloudUrl(HikariConfig config, String rawDbUrl) {
         if (rawDbUrl.startsWith("postgres://") || rawDbUrl.startsWith("postgresql://")) {
             try {
                 URI uri = new URI(rawDbUrl);
@@ -88,26 +129,31 @@ public class DatabaseConfig {
                     config.setUsername(username);
                     config.setPassword(password);
                 }
+                config.setDriverClassName("org.postgresql.Driver");
                 log.info("Configured PostgreSQL DataSource from Cloud URI: host={}:{}, database={}", host, port, path);
             } catch (Exception e) {
-                log.error("Failed to parse cloud database URI '{}', falling back to datasourceUrl: {}", rawDbUrl, e.getMessage());
-                config.setJdbcUrl(datasourceUrl.isBlank() ? "jdbc:postgresql://localhost:5432/hospital" : datasourceUrl);
+                log.error("Failed to parse cloud database URI '{}', falling back: {}", rawDbUrl, e.getMessage());
+                config.setJdbcUrl(rawDbUrl);
                 config.setUsername(username);
                 config.setPassword(password);
+                config.setDriverClassName(driverClassName);
             }
         } else {
             config.setJdbcUrl(rawDbUrl);
             config.setUsername(username);
             config.setPassword(password);
-            log.info("Configured PostgreSQL DataSource with JDBC URL: {}", sanitizeJdbcUrl(rawDbUrl));
+            config.setDriverClassName(driverClassName);
+            log.info("Configured DataSource with JDBC URL: {}", sanitizeJdbcUrl(rawDbUrl));
         }
+    }
 
-        if (config.getJdbcUrl() != null && config.getJdbcUrl().contains("localhost:5432")) {
-            log.warn("⚠️ [DATABASE WARNING] Attempting to connect to localhost:5432. If running inside a cloud container (Render, Railway, Docker), ensure you have set the DATABASE_URL or SPRING_DATASOURCE_URL environment variable pointing to your cloud PostgreSQL database!");
+    private boolean isHostReachable(String host, int port, int timeoutMs) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(host, port), timeoutMs);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-
-        config.setDriverClassName(driverClassName);
-        return new HikariDataSource(config);
     }
 
     private String findEnv(String... names) {

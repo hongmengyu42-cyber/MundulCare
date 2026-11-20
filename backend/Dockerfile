@@ -18,8 +18,8 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Create uploads directory for doctor and profile pictures
-RUN mkdir -p /app/uploads
+# Create uploads and data directories for files and persistent storage
+RUN mkdir -p /app/uploads /app/data
 
 COPY --from=build /app/target/*.jar app.jar
 
