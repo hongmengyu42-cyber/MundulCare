@@ -14,6 +14,10 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
 
     Optional<Doctor> findByLicenseNumber(String licenseNumber);
 
+    Optional<Doctor> findByUserId(Long userId);
+
+    Optional<Doctor> findByEmailIgnoreCase(String email);
+
     boolean existsByLicenseNumber(String licenseNumber);
 
     boolean existsByEmail(String email);
@@ -31,4 +35,10 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
 
     @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specialties s WHERE d.isActive = true AND LOWER(s.name) IN :specialtyNames")
     List<Doctor> findBySpecialtyNamesIgnoreCase(@Param("specialtyNames") List<String> specialtyNames);
+
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specialties s WHERE d.isActive = true AND LOWER(s.name) IN :specialtyNames AND LOWER(d.branchName) = LOWER(:branchName)")
+    List<Doctor> findBySpecialtyNamesAndBranchIgnoreCase(@Param("specialtyNames") List<String> specialtyNames, @Param("branchName") String branchName);
+
+    @Query("SELECT DISTINCT d FROM Doctor d WHERE d.isActive = true AND LOWER(d.branchName) = LOWER(:branchName)")
+    List<Doctor> findByBranchNameIgnoreCase(@Param("branchName") String branchName);
 }

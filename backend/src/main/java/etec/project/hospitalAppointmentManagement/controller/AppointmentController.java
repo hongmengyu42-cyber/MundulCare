@@ -4,6 +4,8 @@ import etec.project.hospitalAppointmentManagement.Repo.UserRepo;
 import etec.project.hospitalAppointmentManagement.Service.AppointmentService;
 import etec.project.hospitalAppointmentManagement.Service.AuditLogService;
 import etec.project.hospitalAppointmentManagement.dto.request.BookAppointmentRequest;
+import etec.project.hospitalAppointmentManagement.dto.request.CallQueueRequest;
+import etec.project.hospitalAppointmentManagement.dto.request.CompleteConsultationRequest;
 import etec.project.hospitalAppointmentManagement.dto.request.UpdateAppointmentStatusRequest;
 import etec.project.hospitalAppointmentManagement.dto.response.ApiResponse;
 import etec.project.hospitalAppointmentManagement.dto.response.AppointmentResponse;
@@ -86,6 +88,57 @@ public class AppointmentController {
                 "Set appointment for " + response.getPatientName() + " with " + response.getDoctorName()
                         + " to " + request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("Appointment status updated to " + request.getStatus(), response));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get appointment detail by ID")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> getAppointmentById(@PathVariable Long id) {
+        AppointmentResponse response = appointmentService.getAppointmentById(id);
+        return ResponseEntity.ok(ApiResponse.success("Appointment details retrieved", response));
+    }
+
+    @PostMapping("/{id}/check-in")
+    @Operation(summary = "Check in patient upon arrival and generate queue ticket")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> checkIn(@PathVariable Long id) {
+        AppointmentResponse response = appointmentService.checkIn(id);
+        return ResponseEntity.ok(ApiResponse.success("Patient successfully checked in! Ticket: " + response.getQueueNumber(), response));
+    }
+
+    @PostMapping("/{id}/call-queue")
+    @Operation(summary = "Call patient queue number into consultation room")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> callQueue(
+            @PathVariable Long id,
+            @RequestBody(required = false) CallQueueRequest request
+    ) {
+        String room = request != null ? request.getRoomNumber() : null;
+        AppointmentResponse response = appointmentService.callQueue(id, room);
+        return ResponseEntity.ok(ApiResponse.success("Queue ticket called", response));
+    }
+
+    @PostMapping("/{id}/start-consultation")
+    @Operation(summary = "Mark consultation in progress")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> startConsultation(@PathVariable Long id) {
+        AppointmentResponse response = appointmentService.startConsultation(id);
+        return ResponseEntity.ok(ApiResponse.success("Consultation started", response));
+    }
+
+    @PostMapping("/{id}/complete-consultation")
+    @Operation(summary = "Complete consultation with clinical notes and digital prescription")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> completeConsultation(
+            @PathVariable Long id,
+            @RequestBody CompleteConsultationRequest request
+    ) {
+        AppointmentResponse response = appointmentService.completeConsultation(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Consultation completed and prescription saved", response));
+    }
+
+    @GetMapping("/queue/live")
+    @Operation(summary = "Get live waiting room queue for TV display screens")
+    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getLiveQueue(
+            @RequestParam(required = false) String branchName
+    ) {
+        List<AppointmentResponse> queue = appointmentService.getLiveQueue(branchName);
+        return ResponseEntity.ok(ApiResponse.success("Live queue retrieved", queue));
     }
 
     @GetMapping("/export/csv")

@@ -30,6 +30,10 @@ public class AuditLog {
     @Column(name = "admin_email", nullable = false)
     private String adminEmail;
 
+    @Column(name = "actor_role", length = 20)
+    @Builder.Default
+    private String actorRole = "ADMIN";
+
     // Short machine-readable action, e.g. "APPROVED_APPOINTMENT", "DELETED_DOCTOR"
     @Column(nullable = false, length = 100)
     private String action;

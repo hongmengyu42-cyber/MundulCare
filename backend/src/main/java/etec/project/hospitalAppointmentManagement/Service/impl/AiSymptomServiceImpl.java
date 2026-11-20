@@ -70,14 +70,44 @@ public class AiSymptomServiceImpl implements AiSymptomService {
             explanation = "Our AI assistant is not currently configured. We've connected you with our General Medicine team, who can evaluate your symptoms and refer you to a specialist if needed.";
         }
 
-        // 3. Fetch active doctors matching the detected specialty from database
-        List<Doctor> doctors = doctorRepo.findBySpecialtyNamesIgnoreCase(List.of(detectedSpecialty.toLowerCase()));
+        // 3. Resolve recommended hospital branch from request branchName or province
+        String targetBranch = null;
+        if (request.getBranchName() != null && !request.getBranchName().isBlank()) {
+            targetBranch = request.getBranchName().trim();
+        } else if (request.getProvince() != null && !request.getProvince().isBlank()) {
+            targetBranch = etec.project.hospitalAppointmentManagement.controller.BranchController.resolveRecommendedBranchName(request.getProvince());
+        }
 
-        // Fallback to General Medicine doctors if no active doctor exists for that specific specialty
-        if (doctors.isEmpty()) {
-            doctors = doctorRepo.findBySpecialtyNamesIgnoreCase(List.of("general medicine"));
-            if (!detectedSpecialty.equalsIgnoreCase("General Medicine")) {
-                explanation += " (Note: Our General Medicine practitioners are available to assist with your initial checkup.)";
+        // 4. Fetch active doctors matching the detected specialty from database
+        List<Doctor> doctors;
+        if (targetBranch != null && !targetBranch.isBlank() && !"ALL".equalsIgnoreCase(targetBranch)) {
+            doctors = doctorRepo.findBySpecialtyNamesAndBranchIgnoreCase(
+                    List.of(detectedSpecialty.toLowerCase()),
+                    targetBranch
+            );
+
+            // Fallback to General Medicine doctors at THAT specific branch if no specific specialist on site
+            if (doctors.isEmpty()) {
+                doctors = doctorRepo.findBySpecialtyNamesAndBranchIgnoreCase(
+                        List.of("general medicine"),
+                        targetBranch
+                );
+                if (!detectedSpecialty.equalsIgnoreCase("General Medicine") && !doctors.isEmpty()) {
+                    explanation += " (Note: Showing General Medicine physicians on duty at " + targetBranch + " for your initial checkup.)";
+                }
+            }
+
+            // Secondary fallback: Any doctor at that branch
+            if (doctors.isEmpty()) {
+                doctors = doctorRepo.findByBranchNameIgnoreCase(targetBranch);
+            }
+        } else {
+            doctors = doctorRepo.findBySpecialtyNamesIgnoreCase(List.of(detectedSpecialty.toLowerCase()));
+            if (doctors.isEmpty()) {
+                doctors = doctorRepo.findBySpecialtyNamesIgnoreCase(List.of("general medicine"));
+                if (!detectedSpecialty.equalsIgnoreCase("General Medicine")) {
+                    explanation += " (Note: Our General Medicine practitioners are available to assist with your initial checkup.)";
+                }
             }
         }
 
@@ -88,6 +118,8 @@ public class AiSymptomServiceImpl implements AiSymptomService {
         return SymptomMatchResponse.builder()
                 .detectedSpecialty(detectedSpecialty)
                 .clinicalExplanation(explanation)
+                .recommendedBranch(targetBranch)
+                .userProvince(request.getProvince())
                 .matchingDoctors(matchingDoctorResponses)
                 .build();
     }

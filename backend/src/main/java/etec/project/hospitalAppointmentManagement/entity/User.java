@@ -57,6 +57,15 @@ public class User {
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
 
+    @Column(name = "admin_level", length = 60)
+    private String adminLevel; // e.g., SUPER_ADMIN, BRANCH_ADMIN, CLINICAL_ADMIN, OPERATIONS_ADMIN
+
+    @Column(name = "assigned_branch", length = 150)
+    private String assignedBranch; // e.g., "All Branches (Global)" or "MundulCare Main Campus (Phnom Penh)"
+
+    @Column(name = "permissions", columnDefinition = "TEXT")
+    private String permissions; // Comma-separated permission keys
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

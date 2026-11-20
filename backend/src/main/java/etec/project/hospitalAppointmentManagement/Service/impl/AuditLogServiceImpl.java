@@ -22,10 +22,14 @@ public class AuditLogServiceImpl implements AuditLogService {
     @Override
     public void log(User admin, String action, String targetType, Long targetId, String details) {
         try {
+            if (admin == null) {
+                return;
+            }
             AuditLog entry = AuditLog.builder()
                     .adminId(admin.getId())
                     .adminName(admin.getName())
                     .adminEmail(admin.getEmail())
+                    .actorRole(admin.getRole() != null ? admin.getRole().name() : "ADMIN")
                     .action(action)
                     .targetType(targetType)
                     .targetId(targetId)
@@ -45,6 +49,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .id(a.getId())
                         .adminName(a.getAdminName())
                         .adminEmail(a.getAdminEmail())
+                        .actorRole(a.getActorRole() != null ? a.getActorRole() : "ADMIN")
                         .action(a.getAction())
                         .targetType(a.getTargetType())
                         .targetId(a.getTargetId())

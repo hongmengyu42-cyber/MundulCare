@@ -4,6 +4,7 @@ import etec.project.hospitalAppointmentManagement.Repo.UserRepo;
 import etec.project.hospitalAppointmentManagement.Service.AuditLogService;
 import etec.project.hospitalAppointmentManagement.Service.DoctorService;
 import etec.project.hospitalAppointmentManagement.dto.request.DoctorRequest;
+import etec.project.hospitalAppointmentManagement.dto.request.ProvisionDoctorAccountRequest;
 import etec.project.hospitalAppointmentManagement.dto.response.ApiResponse;
 import etec.project.hospitalAppointmentManagement.dto.response.DoctorResponse;
 import etec.project.hospitalAppointmentManagement.entity.User;
@@ -111,6 +112,19 @@ public class DoctorController {
     public ResponseEntity<ApiResponse<String>> deleteProfileImage(@PathVariable Long id) {
         doctorService.deleteProfileImage(id);
         return ResponseEntity.ok(ApiResponse.success("Doctor photo removed successfully"));
+    }
+
+    @PostMapping("/{id}/account")
+    @Operation(summary = "Provision or reset a Doctor Portal login account (Admin)")
+    public ResponseEntity<ApiResponse<DoctorResponse>> provisionDoctorAccount(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody ProvisionDoctorAccountRequest request
+    ) {
+        DoctorResponse response = doctorService.provisionDoctorAccount(id, request);
+        auditLogService.log(getAdmin(authentication), "PROVISIONED_DOCTOR_ACCOUNT", "DOCTOR", id,
+                "Provisioned/updated doctor portal login for: " + response.getName() + " (" + response.getAccountEmail() + ")");
+        return ResponseEntity.ok(ApiResponse.success("Doctor portal login configured successfully", response));
     }
 
     private User getAdmin(Authentication authentication) {

@@ -28,6 +28,20 @@ public class GlobalException {
                 .body(ApiResponse.error(e.getMessage()));
     }
 
+    @ExceptionHandler(BadRequest.class)
+    public ResponseEntity<ApiResponse<String>> handleBadRequest(BadRequest e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
+    @ExceptionHandler(Forbidden.class)
+    public ResponseEntity<ApiResponse<String>> handleForbidden(Forbidden e) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException e) {
         return ResponseEntity

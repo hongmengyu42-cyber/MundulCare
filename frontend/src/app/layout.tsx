@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import MaintenanceGate from '@/components/MaintenanceGate';
 
 const figtree = Figtree({
@@ -23,13 +24,36 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`h-full ${figtree.variable}`} suppressHydrationWarning>
+      <head>
+        <meta name="color-scheme" content="light dark" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('mundulcare-theme');
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var isDark = stored === 'dark' || (!stored && prefersDark);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
-        className="min-h-full flex flex-col antialiased bg-slate-50/50 text-slate-800 font-sans selection:bg-[#aa5588] selection:text-white"
+        className="min-h-full flex flex-col antialiased bg-slate-50/50 dark:bg-[#090D16] text-slate-800 dark:text-slate-100 font-sans selection:bg-[#aa5588] selection:text-white transition-colors duration-150"
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <MaintenanceGate>{children}</MaintenanceGate>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <MaintenanceGate>{children}</MaintenanceGate>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

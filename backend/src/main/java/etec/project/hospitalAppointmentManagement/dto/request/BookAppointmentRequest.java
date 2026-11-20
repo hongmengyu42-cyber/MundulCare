@@ -35,4 +35,10 @@ public class BookAppointmentRequest {
 
     @NotBlank(message = "Please provide a reason or symptom description for your visit")
     private String reason;
+
+    // Optional payment fields during booking
+    private String paymentMethod;
+    private String paymentStatus;
+    private Double paidAmount;
+    private String paymentTransactionId;
 }

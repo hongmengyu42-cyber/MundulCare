@@ -1,0 +1,15 @@
+package etec.project.hospitalAppointmentManagement.Repo;
+
+import etec.project.hospitalAppointmentManagement.entity.Notification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface NotificationRepo extends JpaRepository<Notification, Long> {
+    List<Notification> findByRecipientUserIdOrderByCreatedAtDesc(Long recipientUserId);
+    List<Notification> findByRecipientUserIdAndIsReadFalseOrderByCreatedAtDesc(Long recipientUserId);
+    long countByRecipientUserIdAndIsReadFalse(Long recipientUserId);
+    void deleteByRecipientUserId(Long recipientUserId);
+}

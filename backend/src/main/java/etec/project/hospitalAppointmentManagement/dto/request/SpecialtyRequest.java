@@ -16,4 +16,7 @@ public class SpecialtyRequest {
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name; // e.g. "Cardiology"
     private String description;
+    private String branchName;
+    private String floorLocation;
+    private String headOfDepartment;
 }

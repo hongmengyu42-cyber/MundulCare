@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -10,6 +10,8 @@ import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionExpired = searchParams.get('session') === 'expired';
   const { setAuth } = useAuth();
 
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -28,6 +30,8 @@ export default function LoginPage() {
         setAuth(response.data);
         if (response.data.role === 'ADMIN') {
           router.push('/admin');
+        } else if (response.data.role === 'DOCTOR') {
+          router.push('/doctor');
         } else {
           router.push('/');
         }
@@ -48,6 +52,15 @@ export default function LoginPage() {
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Welcome Back</h1>
         <p className="text-xs text-slate-500 mt-1">Sign in to manage your medical consultations</p>
       </div>
+
+      {sessionExpired && (
+        <div className="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-xs text-amber-700">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <span className="font-medium">Your session has expired. Please sign in again to continue.</span>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200/80 text-xs text-red-700">

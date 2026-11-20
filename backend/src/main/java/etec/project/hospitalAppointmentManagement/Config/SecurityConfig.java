@@ -3,10 +3,12 @@ package etec.project.hospitalAppointmentManagement.Config;
 import etec.project.hospitalAppointmentManagement.Security.JwtAuthenticationFilter;
 import etec.project.hospitalAppointmentManagement.Security.MaintenanceModeFilter;
 import etec.project.hospitalAppointmentManagement.Security.RateLimittingFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -63,6 +65,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/payments/webhook/**",
                                 "/error",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -70,14 +73,31 @@ public class SecurityConfig {
                                 "/api/ai/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/doctors/admin/all").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/specialties/**", "/api/doctors/**", "/api/settings/maintenance", "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/specialties/**", "/api/doctors/**", "/api/branches/**", "/api/settings/maintenance", "/uploads/**", "/api/appointments/queue/live").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/doctor-portal/**").hasRole("DOCTOR")
                         .requestMatchers(HttpMethod.POST, "/api/doctors/**", "/api/specialties/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/doctors/**", "/api/specialties/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/doctors/**", "/api/specialties/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/appointments/all", "/api/appointments/export/csv").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/appointments/*/status").hasRole("ADMIN")
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write(
+                                    "{\"success\":false,\"message\":\"Session expired or unauthorized. Please sign in again.\",\"data\":null}"
+                            );
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write(
+                                    "{\"success\":false,\"message\":\"Access Denied: You do not have permission to access this resource.\",\"data\":null}"
+                            );
+                        })
+                )
                 .addFilterBefore(rateLimittingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(maintenanceModeFilter, JwtAuthenticationFilter.class);

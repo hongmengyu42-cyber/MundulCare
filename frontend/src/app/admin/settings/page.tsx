@@ -7,10 +7,12 @@ import AdminHeader from '@/components/AdminHeader';
 import AdminSidebar from '@/components/AdminSidebar';
 import { settingsApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useAdminBranchFilter } from '@/lib/adminBranchFilter';
 
 export default function AdminSettingsPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const [, , scopeInfo] = useAdminBranchFilter();
 
   const [loading, setLoading] = useState(true);
   const [enabled, setEnabled] = useState(false);
@@ -36,11 +38,13 @@ export default function AdminSettingsPage() {
     if (!authLoading) {
       if (!isAuthenticated || user?.role !== 'ADMIN') {
         router.push('/login?redirect=/admin/settings');
+      } else if (scopeInfo.isBranchLocked || (user?.adminLevel && user?.adminLevel !== 'SUPER_ADMIN')) {
+        router.replace('/admin');
       } else {
         fetchStatus();
       }
     }
-  }, [isAuthenticated, user, authLoading]);
+  }, [isAuthenticated, user, authLoading, scopeInfo.isBranchLocked]);
 
   const handleSave = async (nextEnabled: boolean) => {
     setSaving(true);
@@ -63,14 +67,18 @@ export default function AdminSettingsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] flex items-center justify-center text-slate-400">
         <Loader2 className="w-8 h-8 animate-spin text-[#6D28D9] mb-2" />
       </div>
     );
   }
 
+  if (scopeInfo.isBranchLocked || (user?.adminLevel && user?.adminLevel !== 'SUPER_ADMIN')) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#6D28D9] selection:text-white">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-[#090D16] flex flex-col selection:bg-[#6D28D9] selection:text-white">
       <AdminHeader />
 
       <div className="flex-1 flex min-h-0">
@@ -78,23 +86,25 @@ export default function AdminSettingsPage() {
 
         <main className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10 overflow-y-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">System Settings</h1>
-          <p className="text-sm text-slate-500 mt-1">Hospital-wide operational controls and maintenance mode.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">System Settings</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Hospital-wide operational controls and maintenance mode.</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs max-w-2xl">
+        <div className="bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs max-w-2xl">
           <div className="flex items-start justify-between gap-4 mb-5">
             <div className="flex items-start gap-3.5">
               <div
                 className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${
-                  enabled ? 'bg-amber-500/10 border-amber-200/80 text-amber-600' : 'bg-slate-100 border-slate-200 text-slate-400'
+                  enabled
+                    ? 'bg-amber-500/10 border-amber-200/80 dark:border-amber-800 text-amber-600 dark:text-amber-400'
+                    : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
                 }`}
               >
-                <Wrench className="w-6 h-6 text-[#6D28D9]" />
+                <Wrench className="w-6 h-6 text-[#6D28D9] dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900">Hospital Maintenance Mode</h2>
-                <p className="text-sm text-slate-500 mt-0.5 max-w-md leading-relaxed">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">Hospital Maintenance Mode</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 max-w-md leading-relaxed">
                   When enabled, visitors and patients see a clean maintenance screen instead of booking pages. Hospital administrators retain full access to manage records.
                 </p>
               </div>
@@ -107,7 +117,7 @@ export default function AdminSettingsPage() {
               onClick={() => handleSave(!enabled)}
               disabled={saving}
               className={`relative shrink-0 w-12 h-7 rounded-full transition-colors cursor-pointer disabled:opacity-50 ${
-                enabled ? 'bg-amber-500' : 'bg-slate-200'
+                enabled ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-800'
               }`}
             >
               <span
@@ -122,8 +132,8 @@ export default function AdminSettingsPage() {
             <div
               className={`mb-4 p-3 rounded-xl text-sm flex items-start gap-2 ${
                 saveMessage.type === 'success'
-                  ? 'bg-purple-50 border border-purple-200/80 text-[#6D28D9]'
-                  : 'bg-rose-50 border border-rose-200/80 text-rose-700'
+                  ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800 text-[#6D28D9] dark:text-purple-300'
+                  : 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50 text-rose-700 dark:text-rose-400'
               }`}
             >
               {saveMessage.type === 'success' ? (
@@ -136,13 +146,13 @@ export default function AdminSettingsPage() {
           )}
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1.5 text-sm">Public Notice Message</label>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-sm">Public Notice Message</label>
             <textarea
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="We are currently performing scheduled maintenance to improve our clinical systems. Please check back shortly."
-              className="w-full p-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] resize-none"
+              className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] resize-none"
             />
             <div className="flex justify-end mt-3">
               <button

@@ -28,6 +28,15 @@ public class Specialty {
     @Column(columnDefinition = "Text")
     private String description;
 
+    @Column(name = "branch_name", length = 150)
+    private String branchName;
+
+    @Column(name = "floor_location", length = 120)
+    private String floorLocation;
+
+    @Column(name = "head_of_department", length = 120)
+    private String headOfDepartment;
+
     @UpdateTimestamp
     @Column (name = "updated_at")
     private LocalDateTime updatedAt;

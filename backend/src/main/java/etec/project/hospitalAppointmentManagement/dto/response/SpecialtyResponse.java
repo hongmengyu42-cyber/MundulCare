@@ -13,4 +13,7 @@ public class SpecialtyResponse {
     private Long id;
     private String name;
     private String description;
+    private String branchName;
+    private String floorLocation;
+    private String headOfDepartment;
 }

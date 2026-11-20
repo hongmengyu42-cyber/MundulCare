@@ -12,10 +12,12 @@ import {
   Activity,
   PhoneCall,
   Stethoscope,
+  ChevronDown,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import AiSymptomAssistant from '@/components/AiSymptomAssistant';
 import DoctorCard from '@/components/DoctorCard';
+import NearestBranchBanner from '@/components/NearestBranchBanner';
 import { specialtyApi, doctorApi } from '@/lib/api';
 import { Specialty, Doctor } from '@/types/doctor';
 import { HOSPITAL_IMAGES } from '@/lib/doctorAvatar';
@@ -63,33 +65,39 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#aa5588] selection:text-white">
       <Navbar />
 
-      {/* 1. Hero Section - Full-bleed hospital banner with text overlaid on top */}
-      <section className="relative h-130 sm:h-150 lg:h-165 overflow-hidden">
+      {/* 1. Hero Section - Full-Screen Hospital Banner */}
+      <section className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden">
         <img
           src="/banner/photo_2026-09-02_21-04-07.jpg"
           alt="MundulCare Hospital Building"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-center lg:object-[center_35%] select-none pointer-events-none"
         />
-        {/* Scrim so the overlaid text stays readable regardless of what's behind it */}
-        <div className="absolute inset-0 bg-linear-to-r from-slate-950/55 via-slate-950/30 to-slate-950/5" />
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950/30 via-transparent to-transparent" />
+        {/* Layered cinematic gradients for crisp text readability while showcasing hospital architecture */}
+        <div className="absolute inset-0 bg-linear-to-r from-slate-950/80 via-slate-950/45 to-slate-950/20" />
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950/65 via-transparent to-slate-950/20" />
 
-        <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-          <div className="max-w-xl space-y-6">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
+        {/* Hero Content Area */}
+        <div className="relative z-10 flex-1 flex items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-16">
+          <div className="max-w-2xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-xs font-semibold text-[#f3c5dc]">
+              <span className="w-2 h-2 rounded-full bg-[#aa5588] animate-pulse" />
+              <span>Leading Healthcare & AI Clinical Triaging</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
               Modern Medical Care, <br />
-              <span className="text-[#e9a9c8]">Specialists Matched Instantly.</span>
+              <span className="text-[#f3c5dc]">Specialists Matched Instantly.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-200 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-200 max-w-xl leading-relaxed">
               Connect directly with verified hospital physicians, view transparent consultation fees, and schedule visits seamlessly. Powered by smart AI clinical triaging.
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <Link
                 href="/doctors"
-                className="px-5 py-3 rounded-xl bg-[#aa5588] hover:bg-[#924472] text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors inline-flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3.5 rounded-xl bg-[#aa5588] hover:bg-[#924472] text-white font-bold text-sm shadow-lg shadow-[#aa5588]/30 hover:shadow-xl hover:shadow-[#aa5588]/40 transition-all inline-flex items-center gap-2 cursor-pointer active:scale-98"
               >
                 <span>Find a Specialist</span>
                 <ArrowRight className="w-4 h-4" />
@@ -97,32 +105,53 @@ export default function HomePage() {
 
               <a
                 href="#ai-assistant"
-                className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm font-semibold text-xs sm:text-sm transition-colors inline-flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md font-bold text-sm shadow-xs transition-all inline-flex items-center gap-2 cursor-pointer active:scale-98"
               >
                 <span>AI Symptom Matcher</span>
               </a>
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/20">
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20 max-w-lg">
               <div>
-                <div className="text-xl font-bold text-white font-tabular">50+</div>
-                <div className="text-xs text-slate-300 mt-0.5">Hospital Specialists</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white font-tabular">50+</div>
+                <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Hospital Specialists</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-white font-tabular">24/7</div>
-                <div className="text-xs text-slate-300 mt-0.5">Emergency Triage</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white font-tabular">24/7</div>
+                <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Emergency Triage</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-[#e9a9c8] font-tabular">99.4%</div>
-                <div className="text-xs text-slate-300 mt-0.5">Patient Satisfaction</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#f3c5dc] font-tabular">99.4%</div>
+                <div className="text-xs sm:text-sm text-slate-300 mt-0.5">Patient Satisfaction</div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom Scroll Down Indicator */}
+        <div className="relative z-10 pb-6 flex justify-center">
+          <a
+            href="#ai-assistant"
+            aria-label="Scroll to AI Clinical Triaging"
+            className="flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors group cursor-pointer"
+          >
+            <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-300 group-hover:text-white transition-colors">
+              Explore Medical Services
+            </span>
+            <div className="w-7 h-7 rounded-full bg-white/10 border border-white/25 flex items-center justify-center backdrop-blur-xs group-hover:bg-white/20 group-hover:border-white/40 transition-all animate-bounce">
+              <ChevronDown className="w-4 h-4 text-white" />
+            </div>
+          </a>
+        </div>
       </section>
 
-      {/* 2. Smart Clinical Triaging (AI Symptom Matcher) */}
+      {/* 2. Patient Location Filter & Nearest Branch Recommendation */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-10">
+        <NearestBranchBanner />
+      </section>
+
+      {/* 3. Smart Clinical Triaging (AI Symptom Matcher) */}
       <AiSymptomAssistant />
 
       {/* 3. Verified Specialists (Featured Doctors) */}

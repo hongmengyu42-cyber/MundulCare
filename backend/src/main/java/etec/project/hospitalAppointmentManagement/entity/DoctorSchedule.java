@@ -36,6 +36,14 @@ public class DoctorSchedule {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @JsonFormat(pattern = "HH:mm")
+    @Column(name = "break_start")
+    private LocalTime breakStart;
+
+    @JsonFormat(pattern = "HH:mm")
+    @Column(name = "break_end")
+    private LocalTime breakEnd;
+
     @Column(name = "is_available", nullable = false)
     @Builder.Default
     private boolean isAvailable = true;

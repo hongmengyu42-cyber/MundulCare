@@ -11,10 +11,20 @@ import {
   AlertCircle,
   Stethoscope,
   ArrowRight,
+  FileText,
+  CreditCard,
+  BellRing,
+  Ticket,
+  Receipt,
+  QrCode,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { appointmentApi } from '@/lib/api';
-import { AppointmentResponse } from '@/types/appointment';
+import PrescriptionSlipModal from '@/components/PrescriptionSlipModal';
+import InvoiceReceiptModal from '@/components/InvoiceReceiptModal';
+import PaymentCheckoutModal from '@/components/PaymentCheckoutModal';
+import { appointmentApi, invoiceApi } from '@/lib/api';
+import { AppointmentResponse, PaymentMethod } from '@/types/appointment';
+import { Invoice } from '@/types/payment';
 import { useAuth } from '@/context/AuthContext';
 import { getDoctorAvatarUrl } from '@/lib/doctorAvatar';
 
@@ -27,6 +37,26 @@ export default function MyAppointmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [selectedPrescriptionApt, setSelectedPrescriptionApt] = useState<AppointmentResponse | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [loadingInvoice, setLoadingInvoice] = useState(false);
+  const [payingAppointment, setPayingAppointment] = useState<AppointmentResponse | null>(null);
+
+  const handleViewInvoice = async (appointmentId: number) => {
+    setLoadingInvoice(true);
+    try {
+      const res = await invoiceApi.getByAppointmentId(appointmentId);
+      if (res.success && res.data) {
+        setSelectedInvoice(res.data);
+      } else {
+        alert(res.message || 'Invoice not found for this consultation');
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to load official hospital invoice');
+    } finally {
+      setLoadingInvoice(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -187,8 +217,30 @@ export default function MyAppointmentsPage() {
               return (
                 <div
                   key={apt.id}
-                  className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs hover:border-[#aa5588]/40 transition-colors"
+                  className={`bg-white rounded-2xl border p-5 sm:p-6 shadow-xs transition-colors ${
+                    apt.queueStatus === 'CALLING'
+                      ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                      : 'border-slate-200/90 hover:border-[#aa5588]/40'
+                  }`}
                 >
+                  {/* Calling Alert Banner */}
+                  {apt.queueStatus === 'CALLING' && (
+                    <div className="p-3.5 mb-4 rounded-xl bg-emerald-600 text-white flex items-center justify-between shadow-md animate-pulse">
+                      <div className="flex items-center gap-2.5">
+                        <BellRing className="w-5 h-5 shrink-0" />
+                        <div>
+                          <span className="font-black text-sm block">NOW CALLING: Ticket {apt.queueNumber}</span>
+                          <span className="text-xs text-emerald-100">
+                            Dr. {apt.doctorName} is ready for you in <strong>{apt.roomNumber || 'Consultation Room'}</strong>. Please proceed now!
+                          </span>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-lg bg-white/20 font-mono font-black text-xs">
+                        {apt.queueNumber}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                     <div className="flex items-center gap-3.5">
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
@@ -202,13 +254,65 @@ export default function MyAppointmentsPage() {
                         <h3 className="font-bold text-slate-900 text-sm sm:text-base">
                           {apt.doctorName}
                         </h3>
-                        <span className="text-xs font-semibold text-[#aa5588] font-tabular">
-                          Consultation Fee: ${apt.consultationFee?.toFixed(2)}
-                        </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs font-semibold text-[#aa5588] font-tabular">
+                            Fee: ${apt.consultationFee?.toFixed(2)}
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-xs text-slate-500">
+                            {apt.branchName || 'MundulCare Main Campus'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center">
+                    <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                      {/* Queue Ticket Pill */}
+                      {apt.queueNumber && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                          <Ticket className="w-3.5 h-3.5" />
+                          <span>{apt.queueNumber} ({apt.queueStatus || 'WAITING'})</span>
+                        </span>
+                      )}
+
+                      {/* Payment Status Pill */}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        apt.paymentStatus === 'PAID'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        {apt.paymentStatus === 'PAID'
+                          ? `${apt.paymentMethod || 'KHQR'} Paid`
+                          : 'Pay on Arrival'}
+                      </span>
+
+                      {/* Payment Action: Receipt or Pay Now */}
+                      {apt.paymentStatus === 'PAID' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleViewInvoice(apt.id)}
+                          disabled={loadingInvoice}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors cursor-pointer"
+                          title="View Official Receipt"
+                        >
+                          <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Receipt</span>
+                        </button>
+                      ) : (
+                        apt.status !== 'CANCELLED' &&
+                        apt.status !== 'REJECTED' && (
+                          <button
+                            type="button"
+                            onClick={() => setPayingAppointment(apt)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-2xs transition-colors cursor-pointer"
+                            title="Pay with Genuine Bakong KHQR"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                            <span>Pay KHQR</span>
+                          </button>
+                        )
+                      )}
+
                       {getStatusBadge(apt.status)}
 
                       {apt.status === 'PENDING' && (
@@ -244,12 +348,44 @@ export default function MyAppointmentsPage() {
                       </div>
                     </div>
 
+                    {apt.roomNumber && (
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Assigned Room</span>
+                          <strong className="text-slate-800 text-xs">{apt.roomNumber}</strong>
+                        </div>
+                      </div>
+                    )}
+
                     {apt.reason && (
                       <div className="sm:col-span-3 pt-1 text-slate-600">
                         <span className="text-slate-400 text-[10px] block">Reported Symptoms:</span>
                         <p className="text-sm text-slate-800 mt-0.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                           {apt.reason}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Post-Consultation Prescription Actions */}
+                    {(apt.status === 'COMPLETED' || apt.diagnosis) && (
+                      <div className="sm:col-span-3 pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-purple-50/60 border border-purple-200/80">
+                        <div>
+                          <span className="font-bold text-slate-900 text-xs block">
+                            Consultation Completed & Clinical Prescription Ready
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            {apt.diagnosis ? `Diagnosis: ${apt.diagnosis}` : 'Doctor completed consultation notes.'}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPrescriptionApt(apt)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#aa5588] hover:bg-[#924472] text-white text-xs font-bold shadow-2xs transition-colors cursor-pointer shrink-0"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>View Digital Prescription</span>
+                        </button>
                       </div>
                     )}
 
@@ -283,6 +419,38 @@ export default function MyAppointmentsPage() {
           </div>
         )}
       </main>
+
+      {/* Printable Digital Prescription Slip Modal */}
+      <PrescriptionSlipModal
+        isOpen={!!selectedPrescriptionApt}
+        onClose={() => setSelectedPrescriptionApt(null)}
+        appointment={selectedPrescriptionApt}
+      />
+
+      {/* Official Hospital Consultation Invoice Modal */}
+      <InvoiceReceiptModal
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        invoice={selectedInvoice}
+      />
+
+      {/* Real NBC Bakong KHQR Payment Checkout Modal */}
+      {payingAppointment && (
+        <PaymentCheckoutModal
+          isOpen={!!payingAppointment}
+          onClose={() => setPayingAppointment(null)}
+          appointmentId={payingAppointment.id}
+          doctorName={payingAppointment.doctorName}
+          branchName={payingAppointment.branchName}
+          appointmentDate={payingAppointment.appointmentDate}
+          startTime={payingAppointment.startTime}
+          consultationFee={payingAppointment.paidAmount || 25}
+          onConfirmPayment={() => {
+            setPayingAppointment(null);
+            fetchMyAppointments();
+          }}
+        />
+      )}
     </div>
   );
 }

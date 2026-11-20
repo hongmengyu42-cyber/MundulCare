@@ -22,5 +22,8 @@ public class UserProfileResponse {
     private Role role;
     private AuthProvider authProvider;
     private Boolean isVerified;
+    private String adminLevel;
+    private String assignedBranch;
+    private String permissions;
     private LocalDateTime createdAt;
 }

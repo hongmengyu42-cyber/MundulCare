@@ -2,6 +2,7 @@ package etec.project.hospitalAppointmentManagement.Service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import etec.project.hospitalAppointmentManagement.Repo.DoctorRepo;
 import etec.project.hospitalAppointmentManagement.Repo.OtpRepo;
 import etec.project.hospitalAppointmentManagement.Repo.UserRepo;
 import etec.project.hospitalAppointmentManagement.Security.JwtUtils;
@@ -9,6 +10,7 @@ import etec.project.hospitalAppointmentManagement.Service.AuthService;
 import etec.project.hospitalAppointmentManagement.Service.EmailService;
 import etec.project.hospitalAppointmentManagement.dto.request.*;
 import etec.project.hospitalAppointmentManagement.dto.response.AuthResponse;
+import etec.project.hospitalAppointmentManagement.entity.Doctor;
 import etec.project.hospitalAppointmentManagement.entity.OtpVerification;
 import etec.project.hospitalAppointmentManagement.entity.User;
 import etec.project.hospitalAppointmentManagement.enums.AuthProvider;
@@ -36,6 +38,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepo userRepo;
+    private final DoctorRepo doctorRepo;
     private final OtpRepo otpRepo;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -127,15 +130,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtUtils.generateToken(userDetails, user.getId(), user.getRole().name());
 
-        return AuthResponse.builder()
-                .token(token)
-                .tokenType("Bearer")
-                .userId(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .profileImage(user.getProfileImage())
-                .build();
+        return buildAuthResponse(token, user);
     }
 
     // 3. LOGIN
@@ -144,9 +139,16 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepo.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password."));
 
+        if (!user.isActive()) {
+            throw new RuntimeException("This account has been deactivated or locked by an administrator. Please contact your system administrator.");
+        }
+
         if (user.getLockTime() != null) {
             if (user.getLockTime().isAfter(LocalDateTime.now())) {
                 long remainingMinutes = java.time.Duration.between(LocalDateTime.now(), user.getLockTime()).toMinutes() + 1;
+                if (remainingMinutes > 1440) {
+                    throw new RuntimeException("This account has been administratively locked. Please contact your system administrator.");
+                }
                 throw new RuntimeException("Account is locked due to 5 failed attempts. Please try again in " + remainingMinutes + " minutes, or reset your password.");
             } else {
                 user.setLockTime(null);
@@ -169,6 +171,10 @@ public class AuthServiceImpl implements AuthService {
                 user.setLockTime(null);
                 userRepo.save(user);
             }
+        } catch (org.springframework.security.authentication.DisabledException de) {
+            throw new RuntimeException("This account has been deactivated or locked by an administrator. Please contact your system administrator.");
+        } catch (org.springframework.security.authentication.LockedException le) {
+            throw new RuntimeException("This account is currently locked. Please contact your system administrator.");
         } catch (Exception e) {
             int attempts = user.getFailedLoginAttempts() + 1;
             user.setFailedLoginAttempts(attempts);
@@ -187,15 +193,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtUtils.generateToken(userDetails, user.getId(), user.getRole().name());
 
-        return AuthResponse.builder()
-                .token(token)
-                .tokenType("Bearer")
-                .userId(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .profileImage(user.getProfileImage())
-                .build();
+        return buildAuthResponse(token, user);
     }
 
     // 4. FORGOT PASSWORD
@@ -294,18 +292,30 @@ public class AuthServiceImpl implements AuthService {
         String email = claims.get("email");
 
         User user = userRepo.findByEmail(email).orElse(null);
+        Doctor matchedDoctor = doctorRepo.findByEmailIgnoreCase(email).orElse(null);
         if (user == null) {
             user = User.builder()
-                    .name(claims.get("name"))
+                    .name(matchedDoctor != null ? matchedDoctor.getName() : claims.get("name"))
                     .email(email)
                     .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                    .role(Role.PATIENT)
+                    .role(matchedDoctor != null ? Role.DOCTOR : Role.PATIENT)
                     .authProvider(AuthProvider.GOOGLE)
-                    .profileImage(claims.get("picture"))
+                    .profileImage(matchedDoctor != null && matchedDoctor.getProfileImage() != null
+                            ? matchedDoctor.getProfileImage()
+                            : claims.get("picture"))
                     .isActive(true)
                     .isVerified(true)
                     .build();
             user = userRepo.save(user);
+        }
+
+        if (matchedDoctor != null && matchedDoctor.getUser() == null) {
+            if (user.getRole() == Role.PATIENT) {
+                user.setRole(Role.DOCTOR);
+                user = userRepo.save(user);
+            }
+            matchedDoctor.setUser(user);
+            doctorRepo.save(matchedDoctor);
         }
 
         if (user.getLockTime() != null && user.getLockTime().isAfter(LocalDateTime.now())) {
@@ -318,6 +328,10 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtUtils.generateToken(userDetails, user.getId(), user.getRole().name());
 
+        return buildAuthResponse(token, user);
+    }
+
+    private AuthResponse buildAuthResponse(String token, User user) {
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
@@ -326,6 +340,9 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .profileImage(user.getProfileImage())
+                .adminLevel(user.getAdminLevel())
+                .assignedBranch(user.getAssignedBranch())
+                .permissions(user.getPermissions())
                 .build();
     }
 

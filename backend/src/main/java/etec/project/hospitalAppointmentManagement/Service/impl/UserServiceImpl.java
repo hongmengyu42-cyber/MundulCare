@@ -104,6 +104,9 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole())
                 .authProvider(user.getAuthProvider())
                 .isVerified(user.isVerified())
+                .adminLevel(user.getAdminLevel())
+                .assignedBranch(user.getAssignedBranch())
+                .permissions(user.getPermissions())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

@@ -15,19 +15,32 @@ import {
   Phone,
   Mail,
   RotateCcw,
+  Building2,
+  Lock,
+  Tv,
+  Ticket,
+  FileText,
 } from 'lucide-react';
 import AdminHeader from '@/components/AdminHeader';
 import AdminSidebar from '@/components/AdminSidebar';
+import CustomSelect from '@/components/CustomSelect';
 import Pagination from '@/components/Pagination';
-import { appointmentApi } from '@/lib/api';
+import PrescriptionSlipModal from '@/components/PrescriptionSlipModal';
+import { adminBranchApi, appointmentApi, doctorApi } from '@/lib/api';
 import { AppointmentResponse } from '@/types/appointment';
+import { Doctor } from '@/types/doctor';
+import { HospitalBranch } from '@/types/auth';
 import { useAuth } from '@/context/AuthContext';
+import { resolveAppointmentBranch, useAdminBranchFilter } from '@/lib/adminBranchFilter';
 
 export default function AdminAppointmentsPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [branches, setBranches] = useState<HospitalBranch[]>([]);
+  const [branchFilter, setBranchFilter, scopeInfo] = useAdminBranchFilter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -41,6 +54,7 @@ export default function AdminAppointmentsPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [submittingAction, setSubmittingAction] = useState(false);
+  const [prescriptionAppt, setPrescriptionAppt] = useState<AppointmentResponse | null>(null);
 
   // Check auth
   useEffect(() => {
@@ -67,9 +81,19 @@ export default function AdminAppointmentsPage() {
 
   const fetchAppointments = async () => {
     try {
-      const res = await appointmentApi.getAll();
+      const [res, docRes, branchRes] = await Promise.all([
+        appointmentApi.getAll(),
+        doctorApi.getAllForAdmin().catch(() => ({ success: false, data: [] as Doctor[] })),
+        adminBranchApi.getAll().catch(() => ({ success: false, data: [] as HospitalBranch[] })),
+      ]);
       if (res.success && res.data) {
         setAppointments(res.data);
+      }
+      if (docRes.success && docRes.data) {
+        setDoctors(docRes.data);
+      }
+      if (branchRes.success && branchRes.data) {
+        setBranches(branchRes.data);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load appointments.');
@@ -98,6 +122,20 @@ export default function AdminAppointmentsPage() {
     }
   };
 
+  const handleCheckIn = async (id: number) => {
+    setSubmittingAction(true);
+    try {
+      const res = await appointmentApi.checkIn(id);
+      if (res.success) {
+        await fetchAppointments();
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to check in patient');
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
   const handleExportCsv = async () => {
     try {
       await appointmentApi.exportCsv();
@@ -116,14 +154,19 @@ export default function AdminAppointmentsPage() {
       PENDING: 'Pending Review',
     };
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700">
         {labels[status] || status}
       </span>
     );
   };
 
-  // Filter by search, status, specific date, and month
-  const filteredAppointments = appointments.filter((apt) => {
+  // Filter by branch first, then search, status, specific date, and month
+  const branchScopedAppointments =
+    branchFilter === 'ALL'
+      ? appointments
+      : appointments.filter((apt) => resolveAppointmentBranch(apt, doctors) === branchFilter);
+
+  const filteredAppointments = branchScopedAppointments.filter((apt) => {
     const matchesStatus = statusFilter === 'ALL' || apt.status === statusFilter;
     const matchesSearch =
       apt.doctorName.toLowerCase().includes(search.toLowerCase()) ||
@@ -139,28 +182,28 @@ export default function AdminAppointmentsPage() {
   });
 
   const countByStatus = (st: string) => {
-    if (st === 'ALL') return appointments.length;
-    return appointments.filter((a) => a.status === st).length;
+    if (st === 'ALL') return branchScopedAppointments.length;
+    return branchScopedAppointments.filter((a) => a.status === st).length;
   };
 
   // Reset to page 1 whenever the filtered result set changes
   useEffect(() => {
     setPage(1);
-  }, [search, statusFilter, selectedDate, selectedMonth]);
+  }, [search, branchFilter, statusFilter, selectedDate, selectedMonth]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / PAGE_SIZE));
   const paginatedAppointments = filteredAppointments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] flex items-center justify-center text-slate-400">
         <Loader2 className="w-8 h-8 animate-spin text-[#6D28D9] mb-2" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#6D28D9] selection:text-white">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-[#090D16] flex flex-col selection:bg-[#6D28D9] selection:text-white">
       <AdminHeader />
 
       <div className="flex-1 flex min-h-0">
@@ -170,49 +213,79 @@ export default function AdminAppointmentsPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Consultation Appointments
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               Review patient bookings, confirm time slots, and export appointment registries.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-xs self-start sm:self-auto cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-[#6D28D9]" />
-            <span>Export CSV Report</span>
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {scopeInfo.isBranchLocked ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#f5f3ff] dark:bg-purple-950/40 border border-[#ddd6fe] dark:border-purple-800/60 text-xs font-bold text-[#6D28D9] dark:text-purple-300">
+                <Lock className="w-3.5 h-3.5 shrink-0" />
+                <span>{scopeInfo.lockedBranch}</span>
+              </div>
+            ) : (
+              <CustomSelect
+                value={branchFilter}
+                onChange={setBranchFilter}
+                accentColor="#6D28D9"
+                className="w-56"
+                icon={<Building2 className="w-4 h-4 text-[#6D28D9] dark:text-purple-400 shrink-0" />}
+                options={[
+                  { value: 'ALL', label: `All Branches (${branches.length})` },
+                  ...branches.map((b) => ({ value: b.name, label: `${b.city} (${b.code})` })),
+                ]}
+              />
+            )}
+
+            <a
+              href="/queue"
+              target="_blank"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all shadow-xs whitespace-nowrap cursor-pointer"
+            >
+              <Tv className="w-4 h-4 text-[#dd99bb]" />
+              <span>Live Queue Screen</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#0B0F19] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs whitespace-nowrap cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-[#6D28D9] dark:text-purple-400" />
+              <span>Export CSV Report</span>
+            </button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-center gap-2.5">
+          <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-sm text-red-700 dark:text-red-300 flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Filter Controls: Search + Date Pickers + Status Tabs */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 mb-6 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 mb-6 shadow-xs space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             {/* Search Input */}
             <div className="md:col-span-5 relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search patient, doctor, email, phone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-9 h-11 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] transition-all"
+                className="w-full pl-10 pr-9 h-11 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white bg-white dark:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] transition-all"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -226,13 +299,13 @@ export default function AdminAppointmentsPage() {
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3.5 h-11 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] cursor-pointer"
+                  className="w-full px-3.5 h-11 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-slate-800 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] cursor-pointer"
                 />
                 {selectedDate && (
                   <button
                     type="button"
                     onClick={() => setSelectedDate('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
                     title="Clear date"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -240,8 +313,6 @@ export default function AdminAppointmentsPage() {
                 )}
               </div>
             </div>
-
-            
 
             {/* Reset Filter Button */}
             {(selectedDate || selectedMonth || search || statusFilter !== 'ALL') && (
@@ -255,7 +326,7 @@ export default function AdminAppointmentsPage() {
                     setStatusFilter('ALL');
                   }}
                   title="Reset all filters"
-                  className="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                  className="h-11 w-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer shrink-0"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -264,7 +335,7 @@ export default function AdminAppointmentsPage() {
           </div>
 
           {/* Segmented Status Tabs with Counts */}
-          <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
             {[
               { label: 'All', value: 'ALL' },
               { label: 'Pending', value: 'PENDING' },
@@ -283,13 +354,13 @@ export default function AdminAppointmentsPage() {
                   className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 focus:outline-none ${
                     isActive
                       ? 'bg-[#6D28D9] text-white shadow-xs'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
+                      : 'bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800'
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded-md text-xs font-bold font-tabular ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-700'
+                      isActive ? 'bg-white/20 text-white' : 'bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {count}
@@ -301,11 +372,11 @@ export default function AdminAppointmentsPage() {
         </div>
 
         {/* Appointments Data Table */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+        <div className="bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
           {filteredAppointments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200 text-xs uppercase tracking-wider">
+                <thead className="bg-slate-50/80 dark:bg-slate-900/95 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800 text-xs uppercase tracking-wider">
                   <tr>
                     <th className="px-5 py-4">Patient</th>
                     <th className="px-5 py-4">Doctor</th>
@@ -315,18 +386,18 @@ export default function AdminAppointmentsPage() {
                     <th className="px-5 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70 text-slate-700 dark:text-slate-300">
                   {paginatedAppointments.map((apt) => (
-                    <tr key={apt.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={apt.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
                       {/* Patient Details */}
                       <td className="px-5 py-4">
-                        <div className="font-bold text-slate-900 text-sm">{apt.patientName}</div>
-                        <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">{apt.patientName}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
                           <Mail className="w-3 h-3" />
                           <span>{apt.patientEmail}</span>
                         </div>
                         {apt.patientPhone && (
-                          <div className="text-xs text-slate-500 font-tabular mt-0.5 flex items-center gap-1">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 font-tabular mt-0.5 flex items-center gap-1">
                             <Phone className="w-3 h-3" />
                             <span>{apt.patientPhone}</span>
                           </div>
@@ -335,36 +406,57 @@ export default function AdminAppointmentsPage() {
 
                       {/* Doctor Details */}
                       <td className="px-5 py-4">
-                        <div className="font-bold text-slate-900 text-sm">{apt.doctorName}</div>
-                        <div className="text-xs text-slate-500 font-bold font-tabular mt-0.5">
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">{apt.doctorName}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 font-bold font-tabular mt-0.5">
                           Fee: ${apt.consultationFee?.toFixed(2)}
                         </div>
                       </td>
 
                       {/* Date & Time Window */}
                       <td className="px-5 py-4">
-                        <div className="text-slate-800 font-tabular font-bold text-sm">
+                        <div className="text-slate-800 dark:text-slate-200 font-tabular font-bold text-sm">
                           <span>{apt.appointmentDate}</span>
                         </div>
-                        <div className="text-xs text-slate-500 font-tabular mt-0.5">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 font-tabular mt-0.5">
                           <span>{apt.startTime} - {apt.endTime}</span>
                         </div>
                       </td>
 
                       {/* Reason */}
                       <td className="px-5 py-4 max-w-xs">
-                        <p className="text-sm text-slate-700 line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed">
                           {apt.reason || 'General medical consultation'}
                         </p>
                         {apt.rejectionReason && (
-                          <p className="text-xs text-rose-600 mt-1 font-medium bg-rose-50 p-2 rounded-lg border border-rose-200/80">
+                          <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 font-medium bg-rose-50 dark:bg-rose-950/40 p-2 rounded-lg border border-rose-200/80 dark:border-rose-900/60">
                             Decline reason: {apt.rejectionReason}
                           </p>
                         )}
                       </td>
 
-                      {/* Status Pill */}
-                      <td className="px-5 py-4">{getStatusBadge(apt.status)}</td>
+                      {/* Status & Queue Pill */}
+                      <td className="px-5 py-4">
+                        <div className="space-y-1">
+                          <div>{getStatusBadge(apt.status)}</div>
+                          {apt.queueNumber && (
+                            <div>
+                              <span className="font-mono text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                <Ticket className="w-3 h-3" />
+                                <span>{apt.queueNumber} ({apt.queueStatus || 'WAITING'})</span>
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                              apt.paymentStatus === 'PAID'
+                                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800'
+                                : 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800'
+                            }`}>
+                              {apt.paymentStatus === 'PAID' ? `${apt.paymentMethod || 'KHQR'} Paid` : 'Pay at Clinic'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
 
                       {/* Actions */}
                       <td className="px-5 py-4 text-right whitespace-nowrap">
@@ -383,23 +475,51 @@ export default function AdminAppointmentsPage() {
                               type="button"
                               onClick={() => setSelectedAppointment(apt)}
                               disabled={submittingAction}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 text-xs font-bold transition-colors cursor-pointer"
                             >
                               <XCircle className="w-3.5 h-3.5" />
                               <span>Decline</span>
                             </button>
                           </div>
                         ) : apt.status === 'CONFIRMED' ? (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(apt.id, 'COMPLETED')}
-                            disabled={submittingAction}
-                            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            Mark Completed
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {!apt.queueNumber && (
+                              <button
+                                type="button"
+                                onClick={() => handleCheckIn(apt.id)}
+                                disabled={submittingAction}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+                                title="Check in arriving patient and issue queue ticket"
+                              >
+                                <Ticket className="w-3.5 h-3.5" />
+                                <span>Check-In</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus(apt.id, 'COMPLETED')}
+                              disabled={submittingAction}
+                              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                            >
+                              Complete
+                            </button>
+                          </div>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">No action required</span>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {(apt.status === 'COMPLETED' || apt.diagnosis) && (
+                              <button
+                                type="button"
+                                onClick={() => setPrescriptionAppt(apt)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>Rx Slip</span>
+                              </button>
+                            )}
+                            {apt.status !== 'COMPLETED' && !apt.diagnosis && (
+                              <span className="text-xs text-slate-400 dark:text-slate-500 italic">No action required</span>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -408,10 +528,10 @@ export default function AdminAppointmentsPage() {
               </table>
             </div>
           ) : (
-            <div className="p-16 text-center text-slate-400">
-              <Filter className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-slate-700">No appointments found</p>
-              <p className="text-xs text-slate-400 mt-1">Try resetting the date, month, or status filter.</p>
+            <div className="p-16 text-center text-slate-400 dark:text-slate-500">
+              <Filter className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No appointments found</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try resetting the date, month, or status filter.</p>
             </div>
           )}
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} accentColor="#6D28D9" />
@@ -428,23 +548,23 @@ export default function AdminAppointmentsPage() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-in fade-in-50 zoom-in-95 duration-150"
+              className="bg-white dark:bg-[#0B0F19] rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in-50 zoom-in-95 duration-150"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-center justify-center text-rose-600 dark:text-rose-400">
                   <XCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
                     Decline Appointment
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
                     Patient: {selectedAppointment.patientName}
                   </p>
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
                 Please provide a clinical or scheduling reason so the patient is informed promptly.
               </p>
 
@@ -454,7 +574,7 @@ export default function AdminAppointmentsPage() {
                 placeholder="e.g. Doctor is called for emergency surgery; please reschedule for another slot."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] mb-5 resize-none text-slate-900"
+                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#6D28D9]/20 focus:border-[#6D28D9] mb-5 resize-none text-slate-900 dark:text-white bg-white dark:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
 
               <div className="flex justify-end gap-2.5">
@@ -464,7 +584,7 @@ export default function AdminAppointmentsPage() {
                     setSelectedAppointment(null);
                     setRejectReason('');
                   }}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Cancel (Esc)
                 </button>
@@ -480,6 +600,13 @@ export default function AdminAppointmentsPage() {
             </div>
           </div>
         )}
+
+        {/* Digital Prescription Slip Modal */}
+        <PrescriptionSlipModal
+          isOpen={!!prescriptionAppt}
+          onClose={() => setPrescriptionAppt(null)}
+          appointment={prescriptionAppt}
+        />
       </main>
       </div>
     </div>

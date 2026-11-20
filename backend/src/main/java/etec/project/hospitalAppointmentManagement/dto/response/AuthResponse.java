@@ -19,4 +19,7 @@ public class AuthResponse {
  private String email;
  private Role role;
  private String profileImage;
+ private String adminLevel;
+ private String assignedBranch;
+ private String permissions;
 }

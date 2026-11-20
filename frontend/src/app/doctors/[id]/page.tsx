@@ -16,34 +16,37 @@ import {
   Calendar as CalendarIcon,
   Zap,
   Check,
+  Building2,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import PaymentCheckoutModal from '@/components/PaymentCheckoutModal';
 import { doctorApi, appointmentApi } from '@/lib/api';
 import { Doctor } from '@/types/doctor';
-import { BookAppointmentRequest } from '@/types/appointment';
+import { BookAppointmentRequest, PaymentMethod } from '@/types/appointment';
 import { useAuth } from '@/context/AuthContext';
 import { getDoctorAvatarUrl } from '@/lib/doctorAvatar';
 
 // Standard daytime 30-min slots starting strictly at 09:00
 const STANDARD_TIME_SLOTS = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+  '15:00', '15:30', '16:00', '16:30', '17:00',
 ];
 
-// Off-hours / emergency slots for early mornings and evenings
+// Evening / Emergency slots
 const EMERGENCY_TIME_SLOTS = [
-  '07:30', '08:00', '08:30',
-  '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
+  '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+  '17:30', '18:00', '18:30', '19:00', '19:30', '20:00',
+  '20:30', '21:00', '21:30', '22:00', '22:30', '23:00',
 ];
 
-function add30Minutes(timeStr: string): string {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  if (isNaN(hours) || isNaN(minutes)) return '09:30';
-  const totalMinutes = hours * 60 + minutes + 30;
-  const newHours = Math.floor(totalMinutes / 60) % 24;
-  const newMinutes = totalMinutes % 60;
-  return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
-}
+const add30Minutes = (time: string): string => {
+  const [h, m] = time.split(':').map(Number);
+  const total = h * 60 + m + 30;
+  const newH = Math.floor(total / 60) % 24;
+  const newM = total % 60;
+  return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+};
 
 export default function DoctorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -63,6 +66,13 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
   const [patientPhone, setPatientPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [confirmedBookingDetails, setConfirmedBookingDetails] = useState<{
+    paymentMethod?: string;
+    paymentStatus?: string;
+    paidAmount?: number;
+    transactionId?: string;
+  } | null>(null);
 
   useEffect(() => {
     // Set default tomorrow's date
@@ -90,6 +100,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
   }, [resolvedParams.id]);
 
   const activeSlot = slotType === 'custom' ? customTime : selectedSlot;
+  const [pendingAppointmentId, setPendingAppointmentId] = useState<number | null>(null);
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +110,13 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
     }
     if (!doctor) return;
 
-    setSubmitting(true);
+    if (!reason.trim()) {
+      setError('Please provide a reason or symptoms for your consultation.');
+      return;
+    }
+
     setError(null);
+    setSubmitting(true);
 
     const startTime = activeSlot;
     const endTime = add30Minutes(activeSlot);
@@ -112,12 +128,16 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
       endTime,
       reason: reason.trim(),
       patientPhone: patientPhone.trim() || undefined,
+      paymentMethod: 'KHQR',
+      paymentStatus: 'PENDING',
+      paidAmount: doctor.consultationFee,
     };
 
     try {
       const response = await appointmentApi.book(payload);
-      if (response.success) {
-        setBookingSuccess(true);
+      if (response.success && response.data) {
+        setPendingAppointmentId(response.data.id);
+        setShowPaymentModal(true);
       } else {
         setError(response.message || 'Booking submission failed');
       }
@@ -129,6 +149,22 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const handleConfirmBookingWithPayment = async (paymentDetails: {
+    paymentMethod: PaymentMethod;
+    paymentStatus: string;
+    paidAmount: number;
+    paymentTransactionId: string;
+  }) => {
+    setShowPaymentModal(false);
+    setConfirmedBookingDetails({
+      paymentMethod: paymentDetails.paymentMethod,
+      paymentStatus: paymentDetails.paymentStatus,
+      paidAmount: paymentDetails.paidAmount,
+      transactionId: paymentDetails.paymentTransactionId,
+    });
+    setBookingSuccess(true);
+  };
+
   // Quick preset dates
   const setQuickDate = (daysAhead: number) => {
     const d = new Date();
@@ -136,9 +172,18 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
     setAppointmentDate(d.toISOString().split('T')[0]);
   };
 
+  const readableDate = appointmentDate
+    ? new Date(appointmentDate + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 flex flex-col">
+      <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
         <Navbar />
         <div className="flex-1 flex items-center justify-center text-slate-400">
           <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] mb-2" />
@@ -147,63 +192,59 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  if (error || !doctor) {
+  if (error && !doctor) {
     return (
-      <div className="min-h-screen bg-slate-50/50 flex flex-col">
+      <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
         <Navbar />
         <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900 mb-1">Physician Unavailable</h2>
-          <p className="text-sm text-slate-500 mb-6">{error || 'This doctor profile is currently unavailable.'}</p>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Physician Profile Unavailable</h2>
+          <p className="text-slate-500 mb-6">{error}</p>
           <Link
             href="/doctors"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#aa5588] text-white font-semibold text-sm shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#aa5588] text-white font-semibold text-sm hover:bg-[#924472] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Return to Directory</span>
+            <span>Return to Doctor Directory</span>
           </Link>
         </div>
       </div>
     );
   }
 
+  if (!doctor) return null;
+
   const avatarUrl = getDoctorAvatarUrl(doctor.name, doctor.id, doctor.profileImage);
 
-  // Format readable selected date
-  const readableDate = appointmentDate
-    ? new Date(appointmentDate + 'T00:00:00').toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : '';
-
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {/* Back Link */}
-        <div className="mb-6">
-          <Link
-            href="/doctors"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-[#aa5588] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Doctors Directory</span>
-          </Link>
-        </div>
+        <Link
+          href="/doctors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-[#aa5588] transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Doctor Directory</span>
+        </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Doctor Profile Card */}
+        {error && (
+          <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Doctor Details (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
-              {/* Doctor Header */}
               <div className="flex flex-col sm:flex-row gap-5 items-start">
-                <div className="w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-xs">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                   <img
                     src={avatarUrl}
                     alt={doctor.name}
@@ -212,37 +253,39 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                      {doctor.name}
-                    </h1>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#fbf5f8] text-[#aa5588] border border-[#edd5e3]">
-                      License: {doctor.licenseNumber}
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    {doctor.specialties?.map((s) => (
+                      <span
+                        key={s.id}
+                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#fbf5f8] text-[#aa5588] border border-[#edd5e3]"
+                      >
+                        {s.name}
+                      </span>
+                    ))}
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Licensed Practitioner
                     </span>
                   </div>
 
-                  {/* Specialties: Clean without background, styled in emerald-700 */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2 text-sm font-semibold text-emerald-700">
-                    {doctor.specialties?.map((spec, idx) => (
-                      <React.Fragment key={spec.id}>
-                        {idx > 0 && <span className="text-slate-300 font-normal">•</span>}
-                        <span>{spec.name}</span>
-                      </React.Fragment>
-                    ))}
-                  </div>
+                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                    {doctor.name}
+                  </h1>
+
+                  <p className="text-xs text-slate-500 mt-1 font-mono">
+                    License: {doctor.licenseNumber || 'MD-KH-2024'}
+                  </p>
 
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-xs text-slate-400 font-medium">Standard Consultation Fee:</span>
-                    <span className="text-xl font-extrabold text-[#aa5588] font-tabular">
+                    <span className="text-2xl font-extrabold text-[#aa5588] font-tabular">
                       ${doctor.consultationFee.toFixed(2)}
                     </span>
+                    <span className="text-xs text-slate-400">/ 30-min Consultation</span>
                   </div>
                 </div>
               </div>
 
-              {/* Stats & Contact Grid: Clean colored icons without background boxes, grey location */}
+              {/* Stats & Hospital Campus Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 mt-5 border-t border-slate-100 text-sm">
-                {/* Column 1: Experience & Doctor's Contact */}
                 <div className="space-y-3">
                   <div>
                     <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
@@ -265,8 +308,17 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                 </div>
 
-                {/* Column 2: Clinic Room & Phone */}
                 <div className="space-y-3">
+                  <div>
+                    <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                      <Building2 className="w-4 h-4 text-[#aa5588] shrink-0" />
+                      Hospital Campus
+                    </span>
+                    <div className="font-bold text-slate-800 text-sm mt-0.5 pl-6">
+                      {doctor.branchName || 'MundulCare Main Campus (Phnom Penh)'}
+                    </div>
+                  </div>
+
                   <div>
                     <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
                       <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
@@ -290,46 +342,33 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Bio & Qualifications */}
-              {doctor.bio && (
-                <div className="mt-5 pt-5 border-t border-slate-100">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
-                    Professional Background & Clinical Scope
+            {/* Biography & Qualifications */}
+            <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-5">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 mb-2">
+                  Physician Overview & Clinical Background
+                </h2>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {doctor.bio || 'General medical practitioner dedicated to evidence-based healthcare delivery.'}
+                </p>
+              </div>
+
+              {doctor.qualifications && (
+                <div className="pt-4 border-t border-slate-100">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Medical Degrees & Accreditations
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {doctor.bio}
+                  <p className="text-sm text-slate-700 font-medium leading-relaxed">
+                    {doctor.qualifications}
                   </p>
-                </div>
-              )}
-
-              {/* Weekly Consultation Schedules */}
-              {doctor.schedules && doctor.schedules.length > 0 && (
-                <div className="mt-5 pt-5 border-t border-slate-100">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
-                    Weekly Consultation Hours
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {doctor.schedules.map((sch) => (
-                      <div
-                        key={sch.id}
-                        className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs"
-                      >
-                        <span className="font-bold text-slate-800 block text-xs">
-                          {sch.dayOfWeek}
-                        </span>
-                        <span className="text-slate-600 text-xs font-tabular mt-0.5 block">
-                          {sch.startTime} - {sch.endTime}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right Column: Appointment Booking Card */}
+          {/* Booking Card (5 cols) */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-xs sticky top-24">
               <div className="border-b border-slate-100 pb-4 mb-5">
@@ -341,7 +380,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                   Schedule an Appointment
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Select your preferred consultation date and available time slot.
+                  Select your preferred consultation date, available time slot, and payment method.
                 </p>
               </div>
 
@@ -351,18 +390,50 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">
-                    Appointment Requested!
+                    Appointment Confirmed!
                   </h3>
                   <p className="text-sm text-slate-600 leading-relaxed">
-                    Your consultation request for <strong>{readableDate}</strong> at{' '}
-                    <strong>{activeSlot}</strong> has been submitted. Our hospital administration will review and confirm your slot promptly.
+                    Your consultation with <strong>{doctor.name}</strong> for <strong>{readableDate}</strong> at{' '}
+                    <strong>{activeSlot}</strong> has been booked.
                   </p>
+
+                  {confirmedBookingDetails && (
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">Payment Method:</span>
+                        <span className="font-bold text-slate-900">
+                          {confirmedBookingDetails.paymentMethod || 'Pay at Clinic'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">Payment Status:</span>
+                        <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                          confirmedBookingDetails.paymentStatus === 'PAID'
+                            ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+                            : 'text-amber-700 bg-amber-50 border border-amber-200'
+                        }`}>
+                          {confirmedBookingDetails.paymentStatus === 'PAID' ? 'PAID & CONFIRMED' : 'PAY ON ARRIVAL'}
+                        </span>
+                      </div>
+                      {confirmedBookingDetails.transactionId && (
+                        <div className="flex justify-between items-center font-mono text-[11px]">
+                          <span className="text-slate-500">Transaction ID:</span>
+                          <span className="text-slate-700">{confirmedBookingDetails.transactionId}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">Consultation Fee:</span>
+                        <span className="font-black text-[#aa5588]">${confirmedBookingDetails.paidAmount?.toFixed(2)} USD</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="pt-2 flex flex-col gap-2">
                     <Link
                       href="/my-appointments"
                       className="w-full py-2.5 rounded-xl bg-[#aa5588] hover:bg-[#924472] text-white font-semibold text-sm transition-colors block text-center"
                     >
-                      View My Appointments
+                      View My Appointments & Queue
                     </Link>
                     <button
                       type="button"
@@ -425,7 +496,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                         min={new Date().toISOString().split('T')[0]}
                         value={appointmentDate}
                         onChange={(e) => setAppointmentDate(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all cursor-pointer shadow-2xs"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm font-semibold bg-white focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all cursor-pointer shadow-2xs"
                       />
                     </div>
                     {readableDate && (
@@ -435,53 +506,44 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                     )}
                   </div>
 
-                  {/* Slot Selection Tabs: Standard vs Off-Hours/Emergency */}
+                  {/* Slot Selection Tabs */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block font-bold text-slate-700 text-xs">
-                        Select Consultation Slot *
-                      </label>
-                      <div className="flex gap-1 p-0.5 rounded-lg bg-slate-100 text-xs">
-                        <button
-                          type="button"
-                          onClick={() => setSlotType('standard')}
-                          className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                            slotType === 'standard'
-                              ? 'bg-white text-[#aa5588] shadow-2xs'
-                              : 'text-slate-500 hover:text-slate-800'
-                          }`}
-                        >
-                          Daytime (09:00+)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSlotType('emergency')}
-                          className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                            slotType === 'emergency'
-                              ? 'bg-amber-50 text-amber-700 shadow-2xs border border-amber-200'
-                              : 'text-slate-500 hover:text-slate-800'
-                          }`}
-                        >
-                          <Zap className="w-3 h-3 text-amber-600" />
-                          <span>Off-Hours / Emergency</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSlotType('custom')}
-                          className={`px-2 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                            slotType === 'custom'
-                              ? 'bg-white text-[#aa5588] shadow-2xs'
-                              : 'text-slate-500 hover:text-slate-800'
-                          }`}
-                        >
-                          Custom
-                        </button>
-                      </div>
+                    <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                      Consultation Start Time *
+                    </label>
+
+                    <div className="flex rounded-xl bg-slate-100 p-1 mb-2.5 text-xs font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setSlotType('standard')}
+                        className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                          slotType === 'standard' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Daytime Slots
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSlotType('emergency')}
+                        className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                          slotType === 'emergency' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Evening / Urgent
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSlotType('custom')}
+                        className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                          slotType === 'custom' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Custom Time
+                      </button>
                     </div>
 
-                    {/* Standard Slots (Starts strictly at 09:00 AM) */}
                     {slotType === 'standard' && (
-                      <div className="grid grid-cols-4 gap-1.5 max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
                         {STANDARD_TIME_SLOTS.map((slot) => {
                           const isSelected = selectedSlot === slot;
                           return (
@@ -502,10 +564,9 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                       </div>
                     )}
 
-                    {/* Emergency / Off-Hours Slots */}
                     {slotType === 'emergency' && (
                       <div className="space-y-2">
-                        <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                        <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
                           <Zap className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                           <span>
                             Off-hours & emergency slots are reviewed directly by the hospital on-call administrator.
@@ -533,7 +594,6 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                       </div>
                     )}
 
-                    {/* Custom Time Option */}
                     {slotType === 'custom' && (
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                         <label className="block text-xs font-medium text-slate-600">
@@ -543,7 +603,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                           type="time"
                           value={customTime}
                           onChange={(e) => setCustomTime(e.target.value)}
-                          className="w-full p-2 rounded-lg border border-slate-200 bg-white font-tabular font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
+                          className="w-full p-2 rounded-lg border border-slate-200 bg-white font-tabular font-bold text-slate-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
                         />
                       </div>
                     )}
@@ -565,7 +625,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                         placeholder="+855 12 345 678"
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
                       />
                     </div>
                   </div>
@@ -581,7 +641,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                       placeholder="Briefly describe your symptoms or medical concern..."
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      className="w-full p-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] resize-none"
+                      className="w-full p-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] resize-none"
                     />
                   </div>
 
@@ -594,15 +654,15 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                     {submitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Submitting Request...</span>
+                        <span>Processing Booking...</span>
                       </>
                     ) : (
-                      `Request Consultation ($${doctor.consultationFee.toFixed(2)})`
+                      `Continue to Payment (${doctor.consultationFee.toFixed(2)} USD)`
                     )}
                   </button>
 
                   <p className="text-xs text-slate-400 text-center leading-relaxed">
-                    By submitting, you agree to MundulCare&apos;s clinical consultation policies. No payment is required until confirmation.
+                    Choose between Cambodian Bakong KHQR, Credit Card, or Pay at Clinic on the next step.
                   </p>
                 </form>
               )}
@@ -610,6 +670,23 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </main>
+
+      {/* Payment Checkout Modal */}
+      {doctor && (
+        <PaymentCheckoutModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          appointmentId={pendingAppointmentId || undefined}
+          doctorName={doctor.name}
+          specialtyName={doctor.specialties?.map((s) => s.name).join(', ')}
+          branchName={doctor.branchName}
+          appointmentDate={appointmentDate}
+          startTime={activeSlot}
+          consultationFee={doctor.consultationFee}
+          onConfirmPayment={handleConfirmBookingWithPayment}
+          isSubmitting={submitting}
+        />
+      )}
     </div>
   );
 }

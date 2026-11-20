@@ -1,5 +1,6 @@
 package etec.project.hospitalAppointmentManagement.entity;
 
+import etec.project.hospitalAppointmentManagement.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,6 +22,12 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", unique = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private User user;
+
     @Column(nullable = false, length = 100)
     private String name; // e.g. "Dr. Sarah Jenkins"
 
@@ -30,6 +37,10 @@ public class Doctor {
     @Column(length = 20)
     private String phone; // e.g. "+855 12 345 678"
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Gender gender;
+
     @Column(name = "profile_image")
     private String profileImage; // Image URL
 
@@ -38,6 +49,9 @@ public class Doctor {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Column(columnDefinition = "TEXT")
+    private String qualifications;
 
     @Column(name = "experience_years", nullable = false)
     @Builder.Default
@@ -49,6 +63,14 @@ public class Doctor {
 
     @Column(length = 255)
     private String address; // e.g. "Room 304, Building A"
+
+    @Column(name = "branch_name", length = 150)
+    @Builder.Default
+    private String branchName = "MundulCare Main Campus (Phnom Penh)";
+
+    @Column(name = "appointment_duration_minutes")
+    @Builder.Default
+    private Integer appointmentDurationMinutes = 30;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

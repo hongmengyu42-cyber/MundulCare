@@ -16,6 +16,7 @@ interface CustomSelectProps {
   className?: string;
   /** Brand accent color for focus ring & selected option. Defaults to the client pink. */
   accentColor?: string;
+  icon?: React.ReactNode;
 }
 
 export default function CustomSelect({
@@ -25,6 +26,7 @@ export default function CustomSelect({
   placeholder = 'Select option...',
   className = '',
   accentColor = '#aa5588',
+  icon,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,8 +37,10 @@ export default function CustomSelect({
   // variants this app actually uses (client pink / admin purple) are spelled out.
   const isPurple = accentColor === '#6D28D9';
   const ringClass = isPurple ? 'focus:ring-[#6D28D9]/20' : 'focus:ring-[#aa5588]/20';
-  const selectedClass = isPurple ? 'bg-[#f5f3ff] text-[#6D28D9]' : 'bg-[#fbf5f8] text-[#aa5588]';
-  const checkClass = isPurple ? 'text-[#6D28D9]' : 'text-[#aa5588]';
+  const selectedClass = isPurple
+    ? 'bg-[#f5f3ff] dark:bg-purple-950/50 text-[#6D28D9] dark:text-purple-300'
+    : 'bg-[#fbf5f8] dark:bg-pink-950/50 text-[#aa5588] dark:text-pink-300';
+  const checkClass = isPurple ? 'text-[#6D28D9] dark:text-purple-300' : 'text-[#aa5588] dark:text-pink-300';
 
   // Close on outside click
   useEffect(() => {
@@ -61,24 +65,32 @@ export default function CustomSelect({
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-w-0 ${className}`}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm font-medium hover:border-slate-300 focus:outline-none focus:ring-2 ${ringClass} transition-all cursor-pointer shadow-2xs`}
+        className={`w-full max-w-full min-w-0 overflow-hidden flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-700 focus:outline-none focus:ring-2 ${ringClass} transition-all cursor-pointer shadow-2xs`}
       >
-        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <span className="flex items-center gap-2 min-w-0 flex-1 text-left overflow-hidden">
+          {icon && <span className="shrink-0">{icon}</span>}
+          <span
+            className="truncate block min-w-0 flex-1"
+            title={selectedOption ? selectedOption.label : placeholder}
+          >
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </span>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ease-in-out ${
-            isOpen ? 'rotate-180 text-slate-700' : 'rotate-0'
+          className={`w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200 ease-in-out ${
+            isOpen ? 'rotate-180 text-slate-700 dark:text-slate-200' : 'rotate-0'
           }`}
         />
       </button>
 
       {/* Dropdown Menu with animation */}
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 w-full min-w-[180px] bg-white rounded-xl border border-slate-200/90 shadow-lg py-1 max-h-60 overflow-y-auto animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute right-0 left-0 z-50 mt-1.5 w-full min-w-0 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-xl py-1.5 max-h-64 overflow-y-auto animate-in fade-in-50 zoom-in-95 duration-150">
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (
@@ -89,14 +101,16 @@ export default function CustomSelect({
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3.5 py-2 text-sm font-medium transition-colors flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left px-3.5 py-2 text-sm font-medium transition-colors flex items-center justify-between cursor-pointer min-w-0 overflow-hidden ${
                   isSelected
                     ? `${selectedClass} font-bold`
-                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <span className="truncate">{opt.label}</span>
-                {isSelected && <span className={`${checkClass} text-xs`}>✓</span>}
+                <span className="truncate flex-1 min-w-0 pr-2" title={opt.label}>
+                  {opt.label}
+                </span>
+                {isSelected && <span className={`${checkClass} text-xs shrink-0 ml-1`}>✓</span>}
               </button>
             );
           })}

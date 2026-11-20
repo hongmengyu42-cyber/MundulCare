@@ -26,4 +26,8 @@ public interface OtpRepo extends JpaRepository<OtpVerification, Long> {
     @Transactional
     @Query("UPDATE OtpVerification o SET o.isUsed = true WHERE o.email = :email AND o.type = :type AND o.isUsed = false")
     void invalidatePreviousOtps(@Param("email") String email, @Param("type") OtpType type);
+
+    @Modifying
+    @Transactional
+    void deleteByEmail(String email);
 }

@@ -15,6 +15,7 @@ public class AuditLogResponse {
     private Long id;
     private String adminName;
     private String adminEmail;
+    private String actorRole;
     private String action;
     private String targetType;
     private Long targetId;

@@ -17,13 +17,31 @@ function portraitUrl(gender: 'men' | 'women', index: number): string {
 
 // Explicit real human portrait mapping for known seed doctors
 const KNOWN_DOCTOR_PORTRAITS: Record<string, string> = {
+  // Phnom Penh Main Campus
+  sothea: portraitUrl('men', 76),
   sovannara: portraitUrl('men', 32),
   elena: portraitUrl('women', 44),
   rithy: portraitUrl('men', 54),
+  chanmony: portraitUrl('women', 48),
+  serey: portraitUrl('men', 62),
+  kanika: portraitUrl('women', 29),
+  // Siem Reap Branch
+  dara: portraitUrl('men', 41),
+  chenda: portraitUrl('women', 73),
+  sokha: portraitUrl('men', 83),
+  kalyan: portraitUrl('women', 57),
   mary: portraitUrl('women', 65),
-  sothea: portraitUrl('men', 76),
-  bunroeun: portraitUrl('men', 15),
+  visal: portraitUrl('men', 68),
   voleak: portraitUrl('women', 21),
+  // Battambang Medical Center
+  samnang: portraitUrl('men', 26),
+  piseth: portraitUrl('men', 33),
+  neary: portraitUrl('women', 89),
+  sophal: portraitUrl('men', 46),
+  bopha: portraitUrl('women', 92),
+  bunroeun: portraitUrl('men', 15),
+  chanthou: portraitUrl('women', 36),
+  // Fallbacks
   lyheng: portraitUrl('men', 89),
   cheurn: portraitUrl('men', 89),
 };

@@ -18,6 +18,8 @@ import Image from 'next/image';
 import logoImg from '../../public/logo.png';
 import { useAuth } from '@/context/AuthContext';
 import { getImageUrl } from '@/lib/imageUrl';
+import NotificationBell from '@/components/NotificationBell';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -32,6 +34,7 @@ export default function Navbar() {
   ];
 
   const isAdmin = user?.role === 'ADMIN';
+  const isDoctor = user?.role === 'DOCTOR';
 
   // Close profile dropdown on outside click or Escape key
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#0B0F19]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -68,8 +71,8 @@ export default function Navbar() {
             priority
             className="w-11 h-11 sm:w-12 sm:h-12 object-contain group-hover:scale-105 transition-transform shrink-0"
           />
-          <span className="text-xl sm:text-[22px] font-bold text-slate-900 tracking-tight">
-            Mundul <span className="text-[#aa5588]">Care</span>
+          <span className="text-xl sm:text-[22px] font-bold text-slate-900 dark:text-white tracking-tight">
+            Mundul <span className="text-[#aa5588] dark:text-[#dd99bb]">Care</span>
           </span>
         </Link>
 
@@ -83,8 +86,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'text-[#aa5588] bg-[#fbf5f8] font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                    ? 'text-[#aa5588] dark:text-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/60'
                 }`}
               >
                 {link.name}
@@ -94,7 +97,7 @@ export default function Navbar() {
 
           <Link
             href="/#ai-assistant"
-            className="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 transition-colors ml-1.5"
+            className="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors ml-1.5"
           >
             AI Symptom Matcher
           </Link>
@@ -105,8 +108,8 @@ export default function Navbar() {
               href="/my-appointments"
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ml-1 ${
                 pathname === '/my-appointments'
-                  ? 'text-[#aa5588] bg-[#fbf5f8] font-bold border border-[#edd5e3]'
-                  : 'text-slate-600 hover:text-[#aa5588] hover:bg-slate-100/70'
+                  ? 'text-[#aa5588] dark:text-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 font-bold border border-[#edd5e3] dark:border-pink-900/60'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-[#aa5588] dark:hover:text-[#dd99bb] hover:bg-slate-100/70 dark:hover:bg-slate-800/60'
               }`}
             >
               My Appointments
@@ -115,20 +118,27 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop User Actions: Clean Profile Menu (No raw logout on nav bar) */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 sm:gap-3">
+          <ThemeToggle variant="icon" />
+
+          {isAuthenticated && user && (
+            <NotificationBell
+              viewAllHref={isDoctor ? '/doctor/notifications' : '/my-appointments'}
+            />
+          )}
           {isAuthenticated && user ? (
             <div ref={profileMenuRef} className="relative">
               {/* Profile Trigger Button */}
               <button
                 type="button"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-slate-100/80 border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-slate-100/80 dark:hover:bg-slate-800/60 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all cursor-pointer"
               >
                 <div
                   className={`w-8 h-8 rounded-full border font-bold text-xs flex items-center justify-center overflow-hidden shrink-0 shadow-2xs ${
                     isAdmin
-                      ? 'bg-[#f5f3ff] border-[#ddd6fe] text-[#6D28D9]'
-                      : 'bg-[#fbf5f8] border-[#edd5e3] text-[#aa5588]'
+                      ? 'bg-[#f5f3ff] dark:bg-purple-950/50 border-[#ddd6fe] dark:border-purple-800 text-[#6D28D9] dark:text-purple-300'
+                      : 'bg-[#fbf5f8] dark:bg-pink-950/50 border-[#edd5e3] dark:border-pink-900 text-[#aa5588] dark:text-[#dd99bb]'
                   }`}
                 >
                   {user.profileImage ? (
@@ -139,54 +149,75 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold text-slate-800 leading-tight">
+                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">
                     {user.name}
                   </span>
                   {isAdmin && (
-                    <span className="text-[10px] font-bold text-[#6D28D9] leading-none uppercase">
+                    <span className="text-[10px] font-bold text-[#6D28D9] dark:text-purple-400 leading-none uppercase">
                       Admin
+                    </span>
+                  )}
+                  {isDoctor && (
+                    <span className="text-[10px] font-bold text-[#aa5588] dark:text-[#dd99bb] leading-none uppercase">
+                      Doctor
                     </span>
                   )}
                 </div>
 
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                    profileDropdownOpen ? 'rotate-180 text-slate-700' : 'rotate-0'
+                  className={`w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
+                    profileDropdownOpen ? 'rotate-180 text-slate-700 dark:text-slate-200' : 'rotate-0'
                   }`}
                 />
               </button>
 
               {/* Profile Popover Dropdown (Logout tucked away inside menu) */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl border border-slate-200/90 shadow-xl py-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
                   {/* User Profile Card Header */}
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
-                    <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">{user.email}</p>
                     {isAdmin && (
-                      <span className="mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f5f3ff] text-[#6D28D9] border border-[#ddd6fe]">
+                      <span className="mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f5f3ff] dark:bg-purple-950/60 text-[#6D28D9] dark:text-purple-300 border border-[#ddd6fe] dark:border-purple-800">
                         Hospital Administrator
+                      </span>
+                    )}
+                    {isDoctor && (
+                      <span className="mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#fbf5f8] dark:bg-pink-950/60 text-[#aa5588] dark:text-[#dd99bb] border border-[#edd5e3] dark:border-pink-900">
+                        Attending Physician
                       </span>
                     )}
                   </div>
 
                   {/* Nav Links inside dropdown */}
                   <div className="py-1">
+                    {isDoctor && (
+                      <Link
+                        href="/doctor"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-[#aa5588] dark:text-[#dd99bb] hover:bg-[#fbf5f8] dark:hover:bg-slate-800/50 transition-colors"
+                      >
+                        <Stethoscope className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb]" />
+                        <span>Doctor Portal</span>
+                      </Link>
+                    )}
+
                     <Link
-                      href="/profile"
+                      href={isDoctor ? '/doctor/profile' : '/profile'}
                       onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-[#fbf5f8] hover:text-[#aa5588] transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-[#fbf5f8] dark:hover:bg-slate-800/50 hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors"
                     >
-                      <User className="w-4 h-4 text-slate-400" />
+                      <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       <span>Account Settings</span>
                     </Link>
 
                     <Link
-                      href="/my-appointments"
+                      href={isDoctor ? '/doctor/appointments' : '/my-appointments'}
                       onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-[#fbf5f8] hover:text-[#aa5588] transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-[#fbf5f8] dark:hover:bg-slate-800/50 hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors"
                     >
-                      <CalendarCheck className="w-4 h-4 text-slate-400" />
+                      <CalendarCheck className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       <span>My Appointments</span>
                     </Link>
 
@@ -194,23 +225,29 @@ export default function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-[#6D28D9] hover:bg-[#f5f3ff] transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-[#6D28D9] dark:text-purple-400 hover:bg-[#f5f3ff] dark:hover:bg-slate-800/50 transition-colors"
                       >
-                        <Shield className="w-4 h-4 text-[#6D28D9]" />
+                        <Shield className="w-4 h-4 text-[#6D28D9] dark:text-purple-400" />
                         <span>Admin Portal</span>
                       </Link>
                     )}
                   </div>
 
+                  {/* Theme Switcher in Dropdown */}
+                  <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Theme</span>
+                    <ThemeToggle variant="segmented" />
+                  </div>
+
                   {/* Sign Out Button cleanly placed at bottom of menu */}
-                  <div className="pt-1 border-t border-slate-100">
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => {
                         setProfileDropdownOpen(false);
                         logout();
                       }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
@@ -224,14 +261,14 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:text-[#aa5588] hover:bg-[#fbf5f8] border border-transparent hover:border-[#edd5e3] transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-[#aa5588] dark:hover:text-[#dd99bb] hover:bg-[#fbf5f8] dark:hover:bg-slate-800 border border-transparent hover:border-[#edd5e3] dark:hover:border-slate-700 transition-all cursor-pointer"
               >
-                <LogIn className="w-4 h-4 text-[#aa5588]" />
+                <LogIn className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb]" />
                 <span>Sign In</span>
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 text-sm font-semibold text-white bg-[#aa5588] hover:bg-[#924472] rounded-xl shadow-xs transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-white bg-[#aa5588] hover:bg-[#924472] rounded-xl shadow-xs transition-colors cursor-pointer"
               >
                 Register
               </Link>
@@ -241,13 +278,15 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Button */}
         <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle variant="icon" />
+
           {isAuthenticated && user && (
             <Link
               href="/profile"
               className={`w-8 h-8 rounded-full border text-xs font-bold flex items-center justify-center overflow-hidden ${
                 isAdmin
-                  ? 'bg-[#f5f3ff] border-[#ddd6fe] text-[#6D28D9]'
-                  : 'bg-[#fbf5f8] border-[#edd5e3] text-[#aa5588]'
+                  ? 'bg-[#f5f3ff] dark:bg-purple-950/50 border-[#ddd6fe] dark:border-purple-800 text-[#6D28D9] dark:text-purple-300'
+                  : 'bg-[#fbf5f8] dark:bg-pink-950/50 border-[#edd5e3] dark:border-pink-900 text-[#aa5588] dark:text-[#dd99bb]'
               }`}
             >
               {user.profileImage ? (
@@ -261,7 +300,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer"
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -271,7 +310,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B0F19] px-4 pt-3 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -279,8 +318,8 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className={`block px-3 py-2.5 rounded-xl text-sm font-medium ${
                 pathname === link.href
-                  ? 'text-[#aa5588] bg-[#fbf5f8] font-semibold'
-                  : 'text-slate-700 hover:bg-slate-50'
+                  ? 'text-[#aa5588] dark:text-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 font-semibold'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
               }`}
             >
               {link.name}
@@ -290,7 +329,7 @@ export default function Navbar() {
           <Link
             href="/#ai-assistant"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
           >
             AI Symptom Matcher
           </Link>
@@ -300,41 +339,52 @@ export default function Navbar() {
               <Link
                 href="/my-appointments"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
-                <CalendarCheck className="w-4 h-4 text-[#aa5588]" />
+                <CalendarCheck className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb]" />
                 <span>My Appointments</span>
               </Link>
 
               <Link
                 href="/profile"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
-                <User className="w-4 h-4 text-[#aa5588]" />
+                <User className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb]" />
                 <span>Account Settings</span>
               </Link>
+
+              {isDoctor && (
+                <Link
+                  href="/doctor"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-[#aa5588] dark:text-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60"
+                >
+                  <Stethoscope className="w-4 h-4" />
+                  <span>Doctor Portal</span>
+                </Link>
+              )}
 
               {isAdmin && (
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-[#6D28D9] bg-[#f5f3ff] border border-[#ddd6fe]"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-[#6D28D9] dark:text-purple-400 bg-[#f5f3ff] dark:bg-purple-950/40 border border-[#ddd6fe] dark:border-purple-800/60"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Admin Portal</span>
                 </Link>
               )}
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-slate-500 truncate max-w-[200px]">{user?.email}</span>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">{user?.email}</span>
                 <button
                   type="button"
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer inline-flex items-center gap-1"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
@@ -342,13 +392,13 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
-                <LogIn className="w-4 h-4 text-[#aa5588]" />
+                <LogIn className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb]" />
                 <span>Sign In</span>
               </Link>
               <Link

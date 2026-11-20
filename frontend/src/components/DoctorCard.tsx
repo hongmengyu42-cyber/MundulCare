@@ -3,14 +3,15 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Doctor } from '@/types/doctor';
-import { Award, MapPin, ArrowRight, Calendar } from 'lucide-react';
+import { Award, MapPin, ArrowRight, Calendar, Building2, Sparkles } from 'lucide-react';
 import { getDoctorAvatarUrl } from '@/lib/doctorAvatar';
 
 interface DoctorCardProps {
   doctor: Doctor;
+  isNearestBranch?: boolean;
 }
 
-export default function DoctorCard({ doctor }: DoctorCardProps) {
+export default function DoctorCard({ doctor, isNearestBranch }: DoctorCardProps) {
   const router = useRouter();
 
   // Extract unique available days
@@ -96,6 +97,19 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
               </div>
             </div>
           )}
+
+          {/* Hospital Campus / Branch Location */}
+          <div className="flex items-center justify-between gap-2 pt-1 text-xs">
+            <div className="flex items-center gap-1.5 text-slate-600 truncate font-medium">
+              <Building2 className="w-3.5 h-3.5 text-[#aa5588] shrink-0" />
+              <span className="truncate">{doctor.branchName || 'MundulCare Main Campus (Phnom Penh)'}</span>
+            </div>
+            {isNearestBranch && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#aa5588] bg-[#fbf5f8] border border-[#edd5e3] px-2 py-0.5 rounded-full shrink-0">
+                <Sparkles className="w-3 h-3" /> Nearest Branch
+              </span>
+            )}
+          </div>
 
           {doctor.address && (
             <div className="flex items-center gap-2 text-slate-500 text-xs pt-0.5 truncate">

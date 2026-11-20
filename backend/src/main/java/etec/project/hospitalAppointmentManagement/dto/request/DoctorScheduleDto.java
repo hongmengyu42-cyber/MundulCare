@@ -24,6 +24,10 @@ public class DoctorScheduleDto {
     @NotNull(message = "End time is required")
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime; // e.g. "17:00"
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime breakStart; // optional e.g. "12:00"
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime breakEnd; // optional e.g. "13:00"
     @Builder.Default
     private Boolean isAvailable = true;
 }

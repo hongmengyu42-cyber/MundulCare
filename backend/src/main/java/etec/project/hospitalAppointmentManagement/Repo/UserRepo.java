@@ -4,6 +4,7 @@ import etec.project.hospitalAppointmentManagement.entity.User;
 import etec.project.hospitalAppointmentManagement.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepo extends JpaRepository<User, Long> {
@@ -13,4 +14,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     Optional<User> findFirstByRole(Role role);
+
+    List<User> findByRoleOrderByCreatedAtDesc(Role role);
+
+    List<User> findAllByOrderByCreatedAtDesc();
 }

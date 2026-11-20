@@ -41,6 +41,9 @@ public class SpecialtyServiceImpl implements SpecialtyService {
         Specialty specialty = Specialty.builder()
                 .name(request.getName().trim())
                 .description(request.getDescription())
+                .branchName(request.getBranchName())
+                .floorLocation(request.getFloorLocation())
+                .headOfDepartment(request.getHeadOfDepartment())
                 .build();
         specialty = specialtyRepo.save(specialty);
         return mapToResponse(specialty);
@@ -58,6 +61,9 @@ public class SpecialtyServiceImpl implements SpecialtyService {
         }
         specialty.setName(request.getName().trim());
         specialty.setDescription(request.getDescription());
+        specialty.setBranchName(request.getBranchName());
+        specialty.setFloorLocation(request.getFloorLocation());
+        specialty.setHeadOfDepartment(request.getHeadOfDepartment());
         specialty = specialtyRepo.save(specialty);
         return mapToResponse(specialty);
     }
@@ -76,6 +82,9 @@ public class SpecialtyServiceImpl implements SpecialtyService {
                 .id(specialty.getId())
                 .name(specialty.getName())
                 .description(specialty.getDescription())
+                .branchName(specialty.getBranchName() != null ? specialty.getBranchName() : "MundulCare Main Campus (Phnom Penh)")
+                .floorLocation(specialty.getFloorLocation())
+                .headOfDepartment(specialty.getHeadOfDepartment())
                 .build();
     }
 }

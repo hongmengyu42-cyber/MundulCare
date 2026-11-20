@@ -2,10 +2,11 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Loader2, ArrowUpDown, X } from 'lucide-react';
+import { Search, Loader2, ArrowUpDown, X, Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import DoctorCard from '@/components/DoctorCard';
 import CustomSelect from '@/components/CustomSelect';
+import NearestBranchBanner from '@/components/NearestBranchBanner';
 import { specialtyApi, doctorApi } from '@/lib/api';
 import { Specialty, Doctor } from '@/types/doctor';
 
@@ -21,10 +22,12 @@ function DoctorsList() {
   const initialSpecialtyId = searchParams.get('specialtyId')
     ? Number(searchParams.get('specialtyId'))
     : null;
+  const initialBranch = searchParams.get('branch') || null;
 
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<number | null>(initialSpecialtyId);
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(initialBranch);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<string>('default');
   const [loading, setLoading] = useState(true);
@@ -70,8 +73,15 @@ function DoctorsList() {
     return () => clearTimeout(delayDebounce);
   }, [selectedSpecialty, search]);
 
+  // Filter doctors by selected hospital branch (if active)
+  const branchFilteredDoctors = selectedBranch
+    ? doctors.filter(
+        (doc) => (doc.branchName || 'MundulCare Main Campus (Phnom Penh)') === selectedBranch
+      )
+    : doctors;
+
   // Client-side sorting
-  const sortedDoctors = [...doctors].sort((a, b) => {
+  const sortedDoctors = [...branchFilteredDoctors].sort((a, b) => {
     if (sortBy === 'fee-asc') return a.consultationFee - b.consultationFee;
     if (sortBy === 'fee-desc') return b.consultationFee - a.consultationFee;
     if (sortBy === 'exp-desc') return b.experienceYears - a.experienceYears;
@@ -84,14 +94,20 @@ function DoctorsList() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Our Medical Specialists
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Browse verified hospital physicians, filter by medical specialty, and book your consultation.
+            Browse verified hospital physicians, filter by medical specialty or location, and book your consultation.
           </p>
         </div>
+
+        {/* Patient Location Filter & Nearest Branch Recommendation */}
+        <NearestBranchBanner
+          onBranchFilterChange={setSelectedBranch}
+          activeBranchFilter={selectedBranch}
+        />
 
         {/* Search & Sort Bar */}
         <div className="bg-white rounded-2xl border border-slate-200/90 p-4 mb-6 shadow-xs flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -170,7 +186,16 @@ function DoctorsList() {
         ) : sortedDoctors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedDoctors.map((doc) => (
-              <DoctorCard key={doc.id} doctor={doc} />
+              <DoctorCard
+                key={doc.id}
+                doctor={doc}
+                isNearestBranch={
+                  Boolean(
+                    selectedBranch &&
+                      (doc.branchName || 'MundulCare Main Campus (Phnom Penh)') === selectedBranch
+                  )
+                }
+              />
             ))}
           </div>
         ) : (
