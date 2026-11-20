@@ -31,14 +31,16 @@ declare global {
   }
 }
 
+const DEFAULT_GOOGLE_CLIENT_ID = '1084713813406-rlqrcdcce4cm7qksqrqbbgs7pjpicv6r.apps.googleusercontent.com';
+
 // Renders Google's own "Sign in with Google" button (Google Identity Services).
-// Silently renders nothing if NEXT_PUBLIC_GOOGLE_CLIENT_ID isn't configured yet.
+// Falls back to project default client ID if NEXT_PUBLIC_GOOGLE_CLIENT_ID is omitted in deployment.
 export default function GoogleSignInButton() {
   const buttonRef = useRef<HTMLDivElement>(null);
   const { setAuth } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID;
 
   const renderButton = useCallback(() => {
     if (!clientId || !window.google?.accounts?.id || !buttonRef.current) return;
@@ -115,9 +117,9 @@ export default function GoogleSignInButton() {
         onReady={renderButton}
       />
       <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px bg-slate-200" />
-        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">or</span>
-        <div className="flex-1 h-px bg-slate-200" />
+        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+        <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">or</span>
+        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
       </div>
       {error && (
         <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-200/80 text-xs text-red-700 flex items-center gap-2">
