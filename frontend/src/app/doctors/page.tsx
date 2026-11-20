@@ -2,13 +2,14 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Loader2, ArrowUpDown, X, Building2 } from 'lucide-react';
+import { Search, Loader2, ArrowUpDown, X, Building2, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import DoctorCard from '@/components/DoctorCard';
 import CustomSelect from '@/components/CustomSelect';
 import NearestBranchBanner from '@/components/NearestBranchBanner';
 import { specialtyApi, doctorApi } from '@/lib/api';
 import { Specialty, Doctor } from '@/types/doctor';
+import { useAuth } from '@/context/AuthContext';
 
 const SORT_OPTIONS = [
   { value: 'default', label: 'Default Order' },
@@ -18,6 +19,7 @@ const SORT_OPTIONS = [
 ];
 
 function DoctorsList() {
+  const { isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
   const initialSpecialtyId = searchParams.get('specialtyId')
     ? Number(searchParams.get('specialtyId'))
@@ -94,13 +96,25 @@ function DoctorsList() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Our Medical Specialists
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Browse verified hospital physicians, filter by medical specialty or location, and book your consultation.
-          </p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbf5f8] border border-[#edd5e3] text-[#aa5588] text-xs font-semibold mb-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Open Medical Directory</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Our Medical Specialists
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Explore hospital physicians, compare consultation fees, inspect clinic schedules, and reserve appointments with zero friction.
+            </p>
+          </div>
+          {!isAuthenticated && (
+            <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-medium text-slate-500 bg-white py-2 px-3 rounded-xl border border-slate-200 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Guest exploration mode active</span>
+            </div>
+          )}
         </div>
 
         {/* Patient Location Filter & Nearest Branch Recommendation */}

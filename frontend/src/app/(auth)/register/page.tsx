@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { User as UserIcon, Mail, Lock, Phone, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { User as UserIcon, Mail, Lock, Phone, Loader2, AlertCircle, Eye, EyeOff, Calendar, ArrowLeft } from 'lucide-react';
 import { authApi } from '@/lib/api';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
+  const isBookingRedirect = redirectParam && (redirectParam.includes('booking=pending') || redirectParam.includes('/doctors/'));
 
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +31,10 @@ export default function RegisterPage() {
     try {
       const response = await authApi.register(formData);
       if (response.success) {
-        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+        const verifyUrl = redirectParam
+          ? `/verify-email?email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent(redirectParam)}`
+          : `/verify-email?email=${encodeURIComponent(formData.email)}`;
+        router.push(verifyUrl);
       } else {
         setError(response.message || 'Registration failed');
       }
@@ -46,6 +52,18 @@ export default function RegisterPage() {
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Create Account</h1>
         <p className="text-xs text-slate-500 mt-1">Join MundulCare to schedule doctor consultations</p>
       </div>
+
+      {isBookingRedirect && (
+        <div className="mb-5 p-3.5 rounded-xl bg-[#fbf5f8] border border-[#edd5e3] text-xs text-[#aa5588]">
+          <div className="flex items-start gap-2.5">
+            <Calendar className="w-4 h-4 text-[#aa5588] shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong className="font-bold text-slate-800">Finalizing Your Appointment:</strong>{' '}
+              Create your account to confirm your consultation. Your selected time slot, symptoms, and notes are saved.
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200/80 flex items-start gap-2.5 text-xs text-red-700">
@@ -154,10 +172,32 @@ export default function RegisterPage() {
 
       <div className="mt-6 text-center text-xs text-slate-500">
         Already have an account?{' '}
-        <Link href="/login" className="font-semibold text-[#aa5588] hover:underline">
+        <Link
+          href={redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : '/login'}
+          className="font-semibold text-[#aa5588] hover:underline"
+        >
           Sign in
         </Link>
       </div>
+
+      {/* Guest Escape Hatch: Return to Hospital Exploration */}
+      <div className="mt-5 pt-4 border-t border-slate-100 text-center">
+        <Link
+          href="/doctors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#aa5588] transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Explore Hospital & Doctors as Guest</span>
+        </Link>
+      </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading register...</div>}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

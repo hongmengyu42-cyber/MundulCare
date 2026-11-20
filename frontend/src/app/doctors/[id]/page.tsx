@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Award,
   MapPin,
@@ -17,6 +17,8 @@ import {
   Zap,
   Check,
   Building2,
+  Lock,
+  Sparkles,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import PaymentCheckoutModal from '@/components/PaymentCheckoutModal';
@@ -48,9 +50,10 @@ const add30Minutes = (time: string): string => {
   return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
 };
 
-export default function DoctorDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+function DoctorDetailContent({ id }: { id: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isBookingPending = searchParams.get('booking') === 'pending';
   const { isAuthenticated } = useAuth();
 
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -64,6 +67,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
   const [customTime, setCustomTime] = useState<string>('18:00');
   const [reason, setReason] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
+  const [draftRestored, setDraftRestored] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -81,10 +85,43 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
     setAppointmentDate(tomorrow.toISOString().split('T')[0]);
   }, []);
 
+  // Restore draft booking from localStorage (seamless guest flow)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`mundulcare_draft_booking_${id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Valid if under 48 hours old
+        if (Date.now() - (parsed.savedAt || 0) < 48 * 60 * 60 * 1000) {
+          if (parsed.appointmentDate) setAppointmentDate(parsed.appointmentDate);
+          if (parsed.slotType) setSlotType(parsed.slotType);
+          if (parsed.selectedSlot) setSelectedSlot(parsed.selectedSlot);
+          if (parsed.customTime) setCustomTime(parsed.customTime);
+          if (parsed.reason) setReason(parsed.reason);
+          if (parsed.patientPhone) setPatientPhone(parsed.patientPhone);
+          setDraftRestored(true);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to restore booking draft', err);
+    }
+  }, [id]);
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem(`mundulcare_draft_booking_${id}`);
+      localStorage.removeItem('mundulcare_last_draft_doctor_id');
+      localStorage.removeItem('mundulcare_last_draft_doctor_name');
+    } catch {}
+    setDraftRestored(false);
+    setReason('');
+    setPatientPhone('');
+  };
+
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
-        const res = await doctorApi.getById(Number(resolvedParams.id));
+        const res = await doctorApi.getById(Number(id));
         if (res.success && res.data) {
           setDoctor(res.data);
         } else {
@@ -97,23 +134,45 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
       }
     };
     fetchDoctor();
-  }, [resolvedParams.id]);
+  }, [id]);
 
   const activeSlot = slotType === 'custom' ? customTime : selectedSlot;
   const [pendingAppointmentId, setPendingAppointmentId] = useState<number | null>(null);
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      router.push(`/login?redirect=/doctors/${resolvedParams.id}`);
-      return;
-    }
-    if (!doctor) return;
 
     if (!reason.trim()) {
-      setError('Please provide a reason or symptoms for your consultation.');
+      setError('Please provide a reason or symptoms for your consultation so the physician can review.');
       return;
     }
+
+    // Guest Exploration: If not logged in, seamlessly preserve draft and redirect to login/register
+    if (!isAuthenticated) {
+      const draft = {
+        doctorId: Number(id),
+        appointmentDate,
+        slotType,
+        selectedSlot,
+        customTime,
+        reason: reason.trim(),
+        patientPhone: patientPhone.trim(),
+        savedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem(`mundulcare_draft_booking_${id}`, JSON.stringify(draft));
+        localStorage.setItem('mundulcare_last_draft_doctor_id', String(id));
+        if (doctor?.name) {
+          localStorage.setItem('mundulcare_last_draft_doctor_name', doctor.name);
+        }
+      } catch (err) {
+        console.error('Failed to save booking draft to localStorage', err);
+      }
+      router.push(`/login?redirect=${encodeURIComponent(`/doctors/${id}?booking=pending`)}`);
+      return;
+    }
+
+    if (!doctor) return;
 
     setError(null);
     setSubmitting(true);
@@ -163,6 +222,7 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
       transactionId: paymentDetails.paymentTransactionId,
     });
     setBookingSuccess(true);
+    handleClearDraft();
   };
 
   // Quick preset dates
@@ -448,7 +508,35 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleBookingSubmit} className="space-y-4 text-sm">
+                <div>
+                  {draftRestored && (
+                    <div className="mb-4 p-3 rounded-xl bg-[#fbf5f8] border border-[#edd5e3] text-xs text-[#aa5588] flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#aa5588] shrink-0" />
+                        <span className="leading-snug">
+                          Restored your draft consultation for <strong className="text-slate-900">{readableDate}</strong> at <strong className="text-slate-900">{activeSlot}</strong>.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleClearDraft}
+                        className="text-[11px] font-semibold underline text-slate-500 hover:text-slate-800 ml-2 shrink-0 cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+
+                  {isAuthenticated && isBookingPending && draftRestored && (
+                    <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Welcome back!</strong> Your consultation slot has been preserved. Review your information below and click confirm to complete your booking.
+                      </span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleBookingSubmit} className="space-y-4 text-sm">
                   {/* Styled Consultation Date Calendar Picker */}
                   <div>
                     <label className="block font-bold text-slate-700 mb-1.5 text-xs">
@@ -656,16 +744,36 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Processing Booking...</span>
                       </>
+                    ) : !isAuthenticated ? (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>Book Consultation (Sign In to Confirm)</span>
+                      </>
+                    ) : isBookingPending ? (
+                      <span>Confirm & Proceed to Payment (${doctor.consultationFee.toFixed(2)} USD)</span>
                     ) : (
                       `Continue to Payment (${doctor.consultationFee.toFixed(2)} USD)`
                     )}
                   </button>
 
-                  <p className="text-xs text-slate-400 text-center leading-relaxed">
-                    Choose between Cambodian Bakong KHQR, Credit Card, or Pay at Clinic on the next step.
-                  </p>
+                  {!isAuthenticated ? (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-500 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-700">
+                        <Sparkles className="w-3.5 h-3.5 text-[#aa5588]" />
+                        <span>Explore freely as our guest</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-slate-500">
+                        No sign-in is required to explore doctors and schedules. When you click Book, your chosen date, time slot, and medical notes are safely preserved.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 text-center leading-relaxed">
+                      Choose between Cambodian Bakong KHQR, Credit Card, or Pay at Clinic on the next step.
+                    </p>
+                  )}
                 </form>
-              )}
+              </div>
+            )}
             </div>
           </div>
         </div>
@@ -688,5 +796,23 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
         />
       )}
     </div>
+  );
+}
+
+export default function DoctorDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+          <Navbar />
+          <div className="flex-1 flex items-center justify-center text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] mb-2" />
+          </div>
+        </div>
+      }
+    >
+      <DoctorDetailContent id={resolvedParams.id} />
+    </Suspense>
   );
 }

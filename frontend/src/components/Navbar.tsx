@@ -31,6 +31,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Find Doctors', href: '/doctors' },
+    { name: 'Live Queue', href: '/queue' },
   ];
 
   const isAdmin = user?.role === 'ADMIN';

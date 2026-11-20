@@ -53,10 +53,15 @@ export default function GoogleSignInButton() {
           const res = await authApi.googleLogin({ idToken: response.credential });
           if (res.success && res.data) {
             setAuth(res.data);
+            const redirectParam = typeof window !== 'undefined'
+              ? new URLSearchParams(window.location.search).get('redirect')
+              : null;
             if (res.data.role === 'ADMIN') {
               router.push('/admin');
             } else if (res.data.role === 'DOCTOR') {
               router.push('/doctor');
+            } else if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+              router.push(redirectParam);
             } else {
               router.push('/');
             }

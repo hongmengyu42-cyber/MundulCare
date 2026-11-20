@@ -317,7 +317,7 @@ export default function HomePage() {
       </section>
 
       {/* 6. Minimalist Footer */}
-      <footer className="bg-white py-8 mt-auto">
+      <footer className="bg-white py-8 mt-auto border-t border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-2.5">
             <img src="/logo.png" alt="Mundul Care Logo" className="w-5 h-5 object-contain" />
@@ -326,9 +326,19 @@ export default function HomePage() {
             <span>Appointment & Specialist Management</span>
           </div>
 
-          <div className="flex items-center gap-2 text-[#aa5588] font-semibold">
-            <PhoneCall className="w-4 h-4" />
-            <span>Emergency Hotline: +855 12 999 888</span>
+          <div className="flex items-center gap-4 text-slate-500">
+            <Link href="/doctors" className="hover:text-[#aa5588] transition-colors">
+              Specialist Directory
+            </Link>
+            <span>•</span>
+            <Link href="/queue" className="hover:text-[#aa5588] transition-colors">
+              Live Waiting Queue
+            </Link>
+            <span>•</span>
+            <div className="flex items-center gap-1.5 text-[#aa5588] font-semibold">
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>Hotline: +855 12 999 888</span>
+            </div>
           </div>
         </div>
       </footer>
