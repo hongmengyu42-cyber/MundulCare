@@ -34,9 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`h-full ${figtree.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`h-full ${figtree.variable} bg-white dark:bg-[#090D16]`} suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light dark" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -57,7 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="min-h-full flex flex-col antialiased bg-slate-50/50 dark:bg-[#090D16] text-slate-800 dark:text-slate-100 font-sans selection:bg-[#aa5588] selection:text-white transition-colors duration-150"
+        className="min-h-full flex flex-col antialiased bg-[#f8fafc] dark:bg-[#090D16] text-slate-800 dark:text-slate-100 font-sans selection:bg-[#aa5588] selection:text-white transition-colors duration-150"
         suppressHydrationWarning
       >
         <ThemeProvider>

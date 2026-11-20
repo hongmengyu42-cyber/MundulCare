@@ -36,49 +36,49 @@ export default function ThemeToggle({
   if (variant === 'segmented') {
     return (
       <div
-        className={`inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-xs ${className}`}
+        className={`flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-xs ${className}`}
         role="group"
         aria-label="Color theme selection"
       >
         <button
           type="button"
           onClick={() => setTheme('light')}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
             theme === 'light'
-              ? 'bg-white dark:bg-slate-700 text-amber-600 shadow-2xs'
+              ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
-          title="Light Theme"
+          aria-label="Light Theme"
         >
-          <Sun className="w-3.5 h-3.5 text-amber-500" />
+          <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           <span>Light</span>
         </button>
 
         <button
           type="button"
           onClick={() => setTheme('dark')}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
             theme === 'dark'
-              ? 'bg-white dark:bg-slate-700 text-indigo-400 shadow-2xs'
+              ? 'bg-white dark:bg-slate-700 text-indigo-500 dark:text-indigo-400 shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
-          title="Dark Theme"
+          aria-label="Dark Theme"
         >
-          <Moon className="w-3.5 h-3.5 text-indigo-400" />
+          <Moon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
           <span>Dark</span>
         </button>
 
         <button
           type="button"
           onClick={() => setTheme('system')}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
             theme === 'system'
               ? 'bg-white dark:bg-slate-700 text-[#aa5588] dark:text-[#dd99bb] shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
-          title="System Auto Preference"
+          aria-label="System Auto Theme"
         >
-          <Laptop className="w-3.5 h-3.5" />
+          <Laptop className="w-3.5 h-3.5 shrink-0" />
           <span>Auto</span>
         </button>
       </div>

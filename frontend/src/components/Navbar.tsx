@@ -173,7 +173,7 @@ export default function Navbar() {
 
               {/* Profile Popover Dropdown (Logout tucked away inside menu) */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#0B0F19] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
                   {/* User Profile Card Header */}
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                     <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
@@ -234,9 +234,11 @@ export default function Navbar() {
                   </div>
 
                   {/* Theme Switcher in Dropdown */}
-                  <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Theme</span>
-                    <ThemeToggle variant="segmented" />
+                  <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1.5">
+                      Theme
+                    </span>
+                    <ThemeToggle variant="segmented" className="w-full" />
                   </div>
 
                   {/* Sign Out Button cleanly placed at bottom of menu */}
