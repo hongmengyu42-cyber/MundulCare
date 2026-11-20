@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -8,7 +8,7 @@ import { authApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionExpired = searchParams.get('session') === 'expired';
@@ -156,5 +156,13 @@ export default function LoginPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading login...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
