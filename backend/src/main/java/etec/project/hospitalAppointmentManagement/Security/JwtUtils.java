@@ -18,10 +18,10 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtils {
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:awRhKKLNWfpr2iMXYDbQFnNPPJU1aMDdUL3jm4b6XIY=}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400000}")
     private long jwtExpiration;
 
     public String extractEmail(String token){

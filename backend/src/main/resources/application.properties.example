@@ -1,40 +1,54 @@
-# Copy this file to application.properties (same folder) and fill in your own values.
-# application.properties is gitignored so your secrets never get committed.
+# Application Configuration for MundulCare Hospital Management System
+# Properties can be overridden by environment variables in cloud deployment (Docker, Render, Railway, etc.)
 
 spring.application.name=hospitalAppointmentManagement
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/hospital
-spring.datasource.username=your_db_username
-spring.datasource.password=your_db_password
+# Database Configuration
+# Supports standard SPRING_DATASOURCE_URL or cloud DATABASE_URL (Render, Railway, Heroku)
+spring.datasource.url=${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/hospital}}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:postgres}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
-spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.ddl-auto=${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
 
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-
-# Email SMTP Configuration (Gmail example)
-# Use a Gmail App Password, not your normal password: https://myaccount.google.com/apppasswords
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=your_email@gmail.com
-spring.mail.password=your_gmail_app_password
+# Email SMTP Configuration
+# Use a Gmail App Password: https://myaccount.google.com/apppasswords
+spring.mail.host=${SPRING_MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${SPRING_MAIL_PORT:587}
+spring.mail.username=${SPRING_MAIL_USERNAME:}
+spring.mail.password=${SPRING_MAIL_PASSWORD:}
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-# JWT Configuration - generate your own random secret, e.g. `openssl rand -hex 32`
-jwt.secret=replace_with_a_long_random_secret
-jwt.expiration=86400000
+# JWT Configuration - Base64 encoded 256-bit secret key
+jwt.secret=${JWT_SECRET:awRhKKLNWfpr2iMXYDbQFnNPPJU1aMDdUL3jm4b6XIY=}
+jwt.expiration=${JWT_EXPIRATION:86400000}
 
-# Google Gemini API key: https://aistudio.google.com/apikey
-gemini.api.key=your_gemini_api_key
+# Google Gemini API key: https://aistudio.google.com/apikey (optional)
+gemini.api.key=${GEMINI_API_KEY:}
 
 # Profile / doctor photo uploads
 spring.servlet.multipart.max-file-size=5MB
 spring.servlet.multipart.max-request-size=5MB
 
-# Google Sign-In (create an OAuth Client ID at https://console.cloud.google.com/apis/credentials
-# with Authorized JavaScript origin http://localhost:3000, then paste the Client ID below)
-google.client.id=your_google_client_id.apps.googleusercontent.com
+# Google Sign-In (optional)
+google.client.id=${GOOGLE_CLIENT_ID:1084713813406-rlqrcdcce4cm7qksqrqbbgs7pjpicv6r.apps.googleusercontent.com}
+
+# NBC Bakong KHQR Merchant Configuration
+bakong.account-id=${BAKONG_ACCOUNT_ID:mundulcare@aba}
+bakong.merchant-name=${BAKONG_MERCHANT_NAME:MundulCare Hospital}
+bakong.merchant-city=${BAKONG_MERCHANT_CITY:Phnom Penh}
+bakong.acquiring-bank=${BAKONG_ACQUIRING_BANK:ABA Bank}
+bakong.api-base-url=${BAKONG_API_BASE_URL:https://bakong-dev.nbc.gov.kh/v1}
+bakong.api-token=${BAKONG_API_TOKEN:}
+bakong.sandbox-mode=${BAKONG_SANDBOX_MODE:true}
+
+# Centralized Telegram Notification System
+telegram.bot-token=${TELEGRAM_BOT_TOKEN:}
+telegram.finance-chat-id=${TELEGRAM_FINANCE_CHAT_ID:}
+telegram.operations-chat-id=${TELEGRAM_OPERATIONS_CHAT_ID:}
+telegram.admin-chat-id=${TELEGRAM_ADMIN_CHAT_ID:}
+telegram.enabled=${TELEGRAM_ENABLED:false}

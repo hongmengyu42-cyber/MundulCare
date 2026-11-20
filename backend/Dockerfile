@@ -5,6 +5,11 @@ WORKDIR /app
 
 COPY . .
 
+# Ensure an application.properties exists if it was gitignored in repository
+RUN if [ ! -f src/main/resources/application.properties ]; then \
+      cp src/main/resources/application.properties.example src/main/resources/application.properties; \
+    fi
+
 RUN chmod +x mvnw
 RUN ./mvnw -B clean package -DskipTests
 
@@ -12,6 +17,9 @@ RUN ./mvnw -B clean package -DskipTests
 FROM eclipse-temurin:17-jre
 
 WORKDIR /app
+
+# Create uploads directory for doctor and profile pictures
+RUN mkdir -p /app/uploads
 
 COPY --from=build /app/target/*.jar app.jar
 
