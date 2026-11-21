@@ -84,7 +84,8 @@ export interface SymptomMatchRequest {
 }
 
 export interface SymptomMatchResponse {
-  detectedSpecialty: string;
+  medicalRelated?: boolean;
+  detectedSpecialty?: string | null;
   clinicalExplanation: string;
   recommendedBranch?: string;
   userProvince?: string;
