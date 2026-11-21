@@ -10,7 +10,6 @@ import {
   MapPin,
   Building2,
   Compass,
-  HelpCircle,
 } from 'lucide-react';
 import { aiApi } from '@/lib/api';
 import { SymptomMatchResponse, SymptomMatchRequest } from '@/types/doctor';
@@ -154,9 +153,6 @@ export default function AiSymptomAssistant() {
                 placeholder="e.g., I have had a sharp pain in my chest when taking deep breaths and dizziness for the past 2 days..."
                 className="w-full p-4 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all resize-none"
               />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Note: This AI assistant is strictly designed for medical symptom triaging and specialist matching. Non-medical topics will not recommend doctors.
-              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
@@ -221,46 +217,8 @@ export default function AiSymptomAssistant() {
         </div>
       )}
 
-      {/* AI Non-Medical / Off-Topic Notice (No Doctors Recommended) */}
-      {result && (result.medicalRelated === false || !result.detectedSpecialty) && (
-        <div className="mt-8 bg-white rounded-2xl border border-amber-200/90 p-6 sm:p-7 shadow-xs">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">
-                Specialist Triaging Scope
-              </span>
-              <h3 className="text-base font-bold text-slate-900 mt-0.5">
-                Medical Symptoms & Specialist Inquiries Only
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-                {result.clinicalExplanation}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
-            <span>
-              💡 <strong>Tip:</strong> Try one of our common symptom inquiries above (e.g., chest tightness, migraine, back pain).
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setSymptoms('');
-                setResult(null);
-              }}
-              className="font-semibold text-[#aa5588] hover:underline cursor-pointer self-start sm:self-auto"
-            >
-              Clear & Try Another Symptom
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* AI Results Section - ONLY when inquiry is medically relevant */}
-      {result && result.medicalRelated !== false && Boolean(result.detectedSpecialty) && (
+      {/* AI Results Section */}
+      {result && (
         <div className="mt-8 bg-white rounded-2xl border border-[#edd5e3] p-6 sm:p-8 shadow-xs">
           {/* Analysis Header */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-100">
