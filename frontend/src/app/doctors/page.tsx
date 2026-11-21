@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Loader2, ArrowUpDown, X, Building2, Sparkles } from 'lucide-react';
+import { Search, Loader2, ArrowUpDown, X, Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import DoctorCard from '@/components/DoctorCard';
 import CustomSelect from '@/components/CustomSelect';
@@ -98,10 +98,6 @@ function DoctorsList() {
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbf5f8] border border-[#edd5e3] text-[#aa5588] text-xs font-semibold mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Open Medical Directory</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Our Medical Specialists
             </h1>
