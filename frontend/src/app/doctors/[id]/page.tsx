@@ -243,10 +243,10 @@ function DoctorDetailContent({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-[#aa5588] selection:text-white">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] mb-2" />
+        <div className="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-500">
+          <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] dark:text-[#dd99bb] mb-2" />
         </div>
       </div>
     );
@@ -254,14 +254,14 @@ function DoctorDetailContent({ id }: { id: string }) {
 
   if (error && !doctor) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-[#aa5588] selection:text-white">
         <Navbar />
         <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Physician Profile Unavailable</h2>
-          <p className="text-slate-500 mb-6">{error}</p>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Physician Profile Unavailable</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
           <Link
             href="/doctors"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#aa5588] text-white font-semibold text-sm hover:bg-[#924472] transition-colors"
@@ -279,21 +279,21 @@ function DoctorDetailContent({ id }: { id: string }) {
   const avatarUrl = getDoctorAvatarUrl(doctor.name, doctor.id, doctor.profileImage);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-[#aa5588] selection:text-white transition-colors duration-200">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {/* Back Link */}
         <Link
           href="/doctors"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-[#aa5588] transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Doctor Directory</span>
         </Link>
 
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-3">
+          <div className="mb-6 p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-sm flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -302,9 +302,9 @@ function DoctorDetailContent({ id }: { id: string }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Doctor Details (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+            <div className="bg-white dark:bg-[#111726] rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs">
               <div className="flex flex-col sm:flex-row gap-5 items-start">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
                   <img
                     src={avatarUrl}
                     alt={doctor.name}
@@ -317,52 +317,52 @@ function DoctorDetailContent({ id }: { id: string }) {
                     {doctor.specialties?.map((s) => (
                       <span
                         key={s.id}
-                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#fbf5f8] text-[#aa5588] border border-[#edd5e3]"
+                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] border border-[#edd5e3] dark:border-pink-900/60"
                       >
                         {s.name}
                       </span>
                     ))}
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                       Licensed Practitioner
                     </span>
                   </div>
 
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                  <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {doctor.name}
                   </h1>
 
-                  <p className="text-xs text-slate-500 mt-1 font-mono">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
                     License: {doctor.licenseNumber || 'MD-KH-2024'}
                   </p>
 
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-2xl font-extrabold text-[#aa5588] font-tabular">
+                    <span className="text-2xl font-extrabold text-[#aa5588] dark:text-[#dd99bb] font-tabular">
                       ${doctor.consultationFee.toFixed(2)}
                     </span>
-                    <span className="text-xs text-slate-400">/ 30-min Consultation</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">/ 30-min Consultation</span>
                   </div>
                 </div>
               </div>
 
               {/* Stats & Hospital Campus Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 mt-5 border-t border-slate-100 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 mt-5 border-t border-slate-100 dark:border-slate-800/80 text-sm">
                 <div className="space-y-3">
                   <div>
-                    <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
                       <Award className="w-4 h-4 text-amber-500 shrink-0" />
                       Clinical Experience
                     </span>
-                    <div className="font-bold text-slate-800 text-sm mt-0.5 font-tabular pl-6">
+                    <div className="font-bold text-slate-800 dark:text-white text-sm mt-0.5 font-tabular pl-6">
                       {doctor.experienceYears} Years
                     </div>
                   </div>
 
                   <div>
-                    <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
                       <Mail className="w-4 h-4 text-blue-600 shrink-0" />
                       Doctor&apos;s Contact
                     </span>
-                    <div className="font-semibold text-slate-700 text-sm mt-0.5 break-all pl-6">
+                    <div className="font-semibold text-slate-700 dark:text-slate-200 text-sm mt-0.5 break-all pl-6">
                       {doctor.email}
                     </div>
                   </div>
@@ -370,32 +370,32 @@ function DoctorDetailContent({ id }: { id: string }) {
 
                 <div className="space-y-3">
                   <div>
-                    <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
-                      <Building2 className="w-4 h-4 text-[#aa5588] shrink-0" />
+                    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
+                      <Building2 className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb] shrink-0" />
                       Hospital Campus
                     </span>
-                    <div className="font-bold text-slate-800 text-sm mt-0.5 pl-6">
+                    <div className="font-bold text-slate-800 dark:text-white text-sm mt-0.5 pl-6">
                       {doctor.branchName || 'MundulCare Main Campus (Phnom Penh)'}
                     </div>
                   </div>
 
                   <div>
-                    <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
                       <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
                       Clinic Room
                     </span>
-                    <div className="font-bold text-slate-800 text-sm mt-0.5 pl-6">
+                    <div className="font-bold text-slate-800 dark:text-white text-sm mt-0.5 pl-6">
                       {doctor.address || 'Consultation Suite, Building A'}
                     </div>
                   </div>
 
                   {doctor.phone && (
                     <div>
-                      <span className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                      <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
                         <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
                         Phone Extension
                       </span>
-                      <div className="font-semibold text-slate-700 text-sm mt-0.5 font-tabular pl-6">
+                      <div className="font-semibold text-slate-700 dark:text-slate-200 text-sm mt-0.5 font-tabular pl-6">
                         {doctor.phone}
                       </div>
                     </div>
@@ -405,22 +405,22 @@ function DoctorDetailContent({ id }: { id: string }) {
             </div>
 
             {/* Biography & Qualifications */}
-            <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-5">
+            <div className="bg-white dark:bg-[#111726] rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-5">
               <div>
-                <h2 className="text-base font-bold text-slate-900 mb-2">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white mb-2">
                   Physician Overview & Clinical Background
                 </h2>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {doctor.bio || 'General medical practitioner dedicated to evidence-based healthcare delivery.'}
                 </p>
               </div>
 
               {doctor.qualifications && (
-                <div className="pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                  <h3 className="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-2">
                     Medical Degrees & Accreditations
                   </h3>
-                  <p className="text-sm text-slate-700 font-medium leading-relaxed">
+                  <p className="text-sm text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
                     {doctor.qualifications}
                   </p>
                 </div>
@@ -430,60 +430,60 @@ function DoctorDetailContent({ id }: { id: string }) {
 
           {/* Booking Card (5 cols) */}
           <div className="lg:col-span-5">
-            <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-xs sticky top-24">
-              <div className="border-b border-slate-100 pb-4 mb-5">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbf5f8] border border-[#edd5e3] text-[#aa5588] text-xs font-semibold mb-2">
-                  <Clock className="w-3.5 h-3.5 text-[#aa5588]" />
+            <div className="bg-white dark:bg-[#111726] rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-7 shadow-xs sticky top-24">
+              <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-5">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60 text-[#aa5588] dark:text-[#dd99bb] text-xs font-semibold mb-2">
+                  <Clock className="w-3.5 h-3.5 text-[#aa5588] dark:text-[#dd99bb]" />
                   <span>30-Minute Consultation</span>
                 </div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                   Schedule an Appointment
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Select your preferred consultation date, available time slot, and payment method.
                 </p>
               </div>
 
               {bookingSuccess ? (
                 <div className="py-6 text-center space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
                     Appointment Confirmed!
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                     Your consultation with <strong>{doctor.name}</strong> for <strong>{readableDate}</strong> at{' '}
                     <strong>{activeSlot}</strong> has been booked.
                   </p>
 
                   {confirmedBookingDetails && (
-                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Payment Method:</span>
-                        <span className="font-bold text-slate-900">
+                        <span className="text-slate-500 dark:text-slate-400">Payment Method:</span>
+                        <span className="font-bold text-slate-900 dark:text-white">
                           {confirmedBookingDetails.paymentMethod || 'Pay at Clinic'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Payment Status:</span>
+                        <span className="text-slate-500 dark:text-slate-400">Payment Status:</span>
                         <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
                           confirmedBookingDetails.paymentStatus === 'PAID'
-                            ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
-                            : 'text-amber-700 bg-amber-50 border border-amber-200'
+                            ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60'
+                            : 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60'
                         }`}>
                           {confirmedBookingDetails.paymentStatus === 'PAID' ? 'PAID & CONFIRMED' : 'PAY ON ARRIVAL'}
                         </span>
                       </div>
                       {confirmedBookingDetails.transactionId && (
                         <div className="flex justify-between items-center font-mono text-[11px]">
-                          <span className="text-slate-500">Transaction ID:</span>
-                          <span className="text-slate-700">{confirmedBookingDetails.transactionId}</span>
+                          <span className="text-slate-500 dark:text-slate-400">Transaction ID:</span>
+                          <span className="text-slate-700 dark:text-slate-300">{confirmedBookingDetails.transactionId}</span>
                         </div>
                       )}
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Consultation Fee:</span>
-                        <span className="font-black text-[#aa5588]">${confirmedBookingDetails.paidAmount?.toFixed(2)} USD</span>
+                        <span className="text-slate-500 dark:text-slate-400">Consultation Fee:</span>
+                        <span className="font-black text-[#aa5588] dark:text-[#dd99bb]">${confirmedBookingDetails.paidAmount?.toFixed(2)} USD</span>
                       </div>
                     </div>
                   )}
@@ -501,7 +501,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                         setBookingSuccess(false);
                         setReason('');
                       }}
-                      className="text-xs text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                      className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline cursor-pointer"
                     >
                       Book another consultation
                     </button>
@@ -510,17 +510,17 @@ function DoctorDetailContent({ id }: { id: string }) {
               ) : (
                 <div>
                   {draftRestored && (
-                    <div className="mb-4 p-3 rounded-xl bg-[#fbf5f8] border border-[#edd5e3] text-xs text-[#aa5588] flex items-center justify-between">
+                    <div className="mb-4 p-3 rounded-xl bg-[#fbf5f8] dark:bg-pink-950/30 border border-[#edd5e3] dark:border-pink-900/40 text-xs text-[#aa5588] dark:text-[#dd99bb] flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#aa5588] shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb] shrink-0" />
                         <span className="leading-snug">
-                          Restored your draft consultation for <strong className="text-slate-900">{readableDate}</strong> at <strong className="text-slate-900">{activeSlot}</strong>.
+                          Restored your draft consultation for <strong className="text-slate-900 dark:text-white">{readableDate}</strong> at <strong className="text-slate-900 dark:text-white">{activeSlot}</strong>.
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={handleClearDraft}
-                        className="text-[11px] font-semibold underline text-slate-500 hover:text-slate-800 ml-2 shrink-0 cursor-pointer"
+                        className="text-[11px] font-semibold underline text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white ml-2 shrink-0 cursor-pointer"
                       >
                         Clear
                       </button>
@@ -528,8 +528,8 @@ function DoctorDetailContent({ id }: { id: string }) {
                   )}
 
                   {isAuthenticated && isBookingPending && draftRestored && (
-                    <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
-                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-800 dark:text-emerald-200 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                       <span>
                         <strong>Welcome back!</strong> Your consultation slot has been preserved. Review your information below and click confirm to complete your booking.
                       </span>
@@ -539,7 +539,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                   <form onSubmit={handleBookingSubmit} className="space-y-4 text-sm">
                   {/* Styled Consultation Date Calendar Picker */}
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-xs">
                       Consultation Date *
                     </label>
 
@@ -548,28 +548,28 @@ function DoctorDetailContent({ id }: { id: string }) {
                       <button
                         type="button"
                         onClick={() => setQuickDate(0)}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#fbf5f8] hover:text-[#aa5588] text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#fbf5f8] dark:hover:bg-slate-700 hover:text-[#aa5588] dark:hover:text-[#dd99bb] text-slate-600 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Today
                       </button>
                       <button
                         type="button"
                         onClick={() => setQuickDate(1)}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#fbf5f8] hover:text-[#aa5588] text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#fbf5f8] dark:hover:bg-slate-700 hover:text-[#aa5588] dark:hover:text-[#dd99bb] text-slate-600 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Tomorrow
                       </button>
                       <button
                         type="button"
                         onClick={() => setQuickDate(2)}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#fbf5f8] hover:text-[#aa5588] text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#fbf5f8] dark:hover:bg-slate-700 hover:text-[#aa5588] dark:hover:text-[#dd99bb] text-slate-600 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         In 2 Days
                       </button>
                       <button
                         type="button"
                         onClick={() => setQuickDate(3)}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#fbf5f8] hover:text-[#aa5588] text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#fbf5f8] dark:hover:bg-slate-700 hover:text-[#aa5588] dark:hover:text-[#dd99bb] text-slate-600 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         In 3 Days
                       </button>
@@ -577,35 +577,35 @@ function DoctorDetailContent({ id }: { id: string }) {
 
                     {/* Styled Calendar Input */}
                     <div className="relative">
-                      <CalendarIcon className="w-4 h-4 text-[#aa5588] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <CalendarIcon className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <input
                         type="date"
                         required
                         min={new Date().toISOString().split('T')[0]}
                         value={appointmentDate}
                         onChange={(e) => setAppointmentDate(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm font-semibold bg-white focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all cursor-pointer shadow-2xs"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all cursor-pointer shadow-2xs"
                       />
                     </div>
                     {readableDate && (
-                      <span className="block text-xs font-medium text-slate-500 mt-1">
-                        Scheduled for: <strong className="text-slate-800">{readableDate}</strong>
+                      <span className="block text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+                        Scheduled for: <strong className="text-slate-800 dark:text-white">{readableDate}</strong>
                       </span>
                     )}
                   </div>
 
                   {/* Slot Selection Tabs */}
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-xs">
                       Consultation Start Time *
                     </label>
 
-                    <div className="flex rounded-xl bg-slate-100 p-1 mb-2.5 text-xs font-semibold">
+                    <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-2.5 text-xs font-semibold">
                       <button
                         type="button"
                         onClick={() => setSlotType('standard')}
                         className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                          slotType === 'standard' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                          slotType === 'standard' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         Daytime Slots
@@ -614,7 +614,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                         type="button"
                         onClick={() => setSlotType('emergency')}
                         className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                          slotType === 'emergency' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                          slotType === 'emergency' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         Evening / Urgent
@@ -623,7 +623,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                         type="button"
                         onClick={() => setSlotType('custom')}
                         className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                          slotType === 'custom' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                          slotType === 'custom' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         Custom Time
@@ -631,7 +631,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                     </div>
 
                     {slotType === 'standard' && (
-                      <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800">
                         {STANDARD_TIME_SLOTS.map((slot) => {
                           const isSelected = selectedSlot === slot;
                           return (
@@ -642,7 +642,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                               className={`py-1.5 px-2 rounded-lg text-xs font-semibold font-tabular transition-colors cursor-pointer ${
                                 isSelected
                                   ? 'bg-[#aa5588] text-white shadow-2xs'
-                                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-[#fbf5f8] hover:text-[#aa5588]'
+                                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-[#fbf5f8] dark:hover:bg-pink-950/40 hover:text-[#aa5588] dark:hover:text-[#dd99bb]'
                               }`}
                             >
                               {slot}
@@ -654,13 +654,13 @@ function DoctorDetailContent({ id }: { id: string }) {
 
                     {slotType === 'emergency' && (
                       <div className="space-y-2">
-                        <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
-                          <Zap className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                           <span>
                             Off-hours & emergency slots are reviewed directly by the hospital on-call administrator.
                           </span>
                         </div>
-                        <div className="grid grid-cols-4 gap-1.5 max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="grid grid-cols-4 gap-1.5 max-h-40 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800">
                           {EMERGENCY_TIME_SLOTS.map((slot) => {
                             const isSelected = selectedSlot === slot;
                             return (
@@ -671,7 +671,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                                 className={`py-1.5 px-2 rounded-lg text-xs font-semibold font-tabular transition-colors cursor-pointer ${
                                   isSelected
                                     ? 'bg-amber-600 text-white shadow-2xs'
-                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-amber-50 hover:text-amber-800'
+                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-200'
                                 }`}
                               >
                                 {slot}
@@ -683,44 +683,44 @@ function DoctorDetailContent({ id }: { id: string }) {
                     )}
 
                     {slotType === 'custom' && (
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                        <label className="block text-xs font-medium text-slate-600">
+                      <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <label className="block text-xs font-medium text-slate-600 dark:text-slate-300">
                           Enter Specific Consultation Start Time:
                         </label>
                         <input
                           type="time"
                           value={customTime}
                           onChange={(e) => setCustomTime(e.target.value)}
-                          className="w-full p-2 rounded-lg border border-slate-200 bg-white font-tabular font-bold text-slate-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
+                          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-tabular font-bold text-slate-800 dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
                         />
                       </div>
                     )}
 
-                    <span className="block text-xs text-slate-400 mt-1.5">
-                      Consultation window: <strong className="text-slate-800 font-tabular">{activeSlot} - {add30Minutes(activeSlot)}</strong>
+                    <span className="block text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                      Consultation window: <strong className="text-slate-800 dark:text-slate-200 font-tabular">{activeSlot} - {add30Minutes(activeSlot)}</strong>
                     </span>
                   </div>
 
                   {/* Contact Phone */}
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-xs">
                       Patient Phone Number
                     </label>
                     <div className="relative">
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="tel"
                         placeholder="+855 12 345 678"
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588]"
                       />
                     </div>
                   </div>
 
                   {/* Reason for Visit */}
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-xs">
                       Reason for Consultation / Symptoms *
                     </label>
                     <textarea
@@ -729,7 +729,7 @@ function DoctorDetailContent({ id }: { id: string }) {
                       placeholder="Briefly describe your symptoms or medical concern..."
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      className="w-full p-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] resize-none"
+                      className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] resize-none"
                     />
                   </div>
 
@@ -757,17 +757,17 @@ function DoctorDetailContent({ id }: { id: string }) {
                   </button>
 
                   {!isAuthenticated ? (
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-500 space-y-1">
-                      <div className="flex items-center gap-1.5 font-semibold text-slate-700">
-                        <Sparkles className="w-3.5 h-3.5 text-[#aa5588]" />
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                        <Sparkles className="w-3.5 h-3.5 text-[#aa5588] dark:text-[#dd99bb]" />
                         <span>Explore freely as our guest</span>
                       </div>
-                      <p className="text-[11px] leading-relaxed text-slate-500">
+                      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                         No sign-in is required to explore doctors and schedules. When you click Book, your chosen date, time slot, and medical notes are safely preserved.
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-400 text-center leading-relaxed">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center leading-relaxed">
                       Choose between Cambodian Bakong KHQR, Credit Card, or Pay at Clinic on the next step.
                     </p>
                   )}
@@ -804,10 +804,10 @@ export default function DoctorDetailPage({ params }: { params: Promise<{ id: str
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] flex flex-col selection:bg-[#aa5588] selection:text-white">
           <Navbar />
-          <div className="flex-1 flex items-center justify-center text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] mb-2" />
+          <div className="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] dark:text-[#dd99bb] mb-2" />
           </div>
         </div>
       }

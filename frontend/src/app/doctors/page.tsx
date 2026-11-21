@@ -91,22 +91,22 @@ function DoctorsList() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-[#aa5588] selection:text-white transition-colors duration-200">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Our Medical Specialists
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               Explore hospital physicians, compare consultation fees, inspect clinic schedules, and reserve appointments with zero friction.
             </p>
           </div>
           {!isAuthenticated && (
-            <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-medium text-slate-500 bg-white py-2 px-3 rounded-xl border border-slate-200 shadow-2xs">
+            <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#111726] py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Guest exploration mode active</span>
             </div>
@@ -120,22 +120,22 @@ function DoctorsList() {
         />
 
         {/* Search & Sort Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 mb-6 shadow-xs flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="bg-white dark:bg-[#111726] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 mb-6 shadow-xs flex flex-col sm:flex-row gap-3 items-stretch sm:items-center transition-colors">
           {/* Search Box */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search doctor by name, credentials, or symptoms..."
-              className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -144,8 +144,8 @@ function DoctorsList() {
 
           {/* Sort Selector with Custom Dropdown & Animated Chevron */}
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
-              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-400 flex items-center gap-1">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400" />
               Sort:
             </span>
             <CustomSelect
@@ -165,7 +165,7 @@ function DoctorsList() {
             className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               selectedSpecialty === null
                 ? 'bg-[#aa5588] text-white shadow-2xs'
-                : 'bg-white text-slate-600 hover:bg-[#fbf5f8] hover:text-[#aa5588] border border-slate-200'
+                : 'bg-white dark:bg-[#111726] text-slate-600 dark:text-slate-300 hover:bg-[#fbf5f8] dark:hover:bg-slate-800/80 hover:text-[#aa5588] dark:hover:text-[#dd99bb] border border-slate-200 dark:border-slate-800'
             }`}
           >
             All Specialties
@@ -179,7 +179,7 @@ function DoctorsList() {
               className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 selectedSpecialty === spec.id
                   ? 'bg-[#aa5588] text-white shadow-2xs'
-                  : 'bg-white text-slate-600 hover:bg-[#fbf5f8] hover:text-[#aa5588] border border-slate-200'
+                  : 'bg-white dark:bg-[#111726] text-slate-600 dark:text-slate-300 hover:bg-[#fbf5f8] dark:hover:bg-slate-800/80 hover:text-[#aa5588] dark:hover:text-[#dd99bb] border border-slate-200 dark:border-slate-800'
               }`}
             >
               {spec.name}
@@ -189,8 +189,8 @@ function DoctorsList() {
 
         {/* Doctor Grid */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] mb-2" />
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-[#aa5588] dark:text-[#dd99bb] mb-2" />
             <span className="text-sm font-medium">Loading specialists...</span>
           </div>
         ) : sortedDoctors.length > 0 ? (
@@ -209,12 +209,12 @@ function DoctorsList() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200/90 p-8">
-            <div className="w-12 h-12 rounded-full bg-[#fbf5f8] text-[#aa5588] flex items-center justify-center mx-auto mb-3">
+          <div className="text-center py-16 bg-white dark:bg-[#111726] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-8">
+            <div className="w-12 h-12 rounded-full bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] flex items-center justify-center mx-auto mb-3">
               <Search className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-slate-800">No specialists match your search</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white">No specialists match your search</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-sm mx-auto">
               Try adjusting your search terms or clearing the specialty filter.
             </p>
             <button
@@ -223,7 +223,7 @@ function DoctorsList() {
                 setSelectedSpecialty(null);
                 setSearch('');
               }}
-              className="mt-4 px-4 py-2 rounded-xl bg-[#fbf5f8] text-[#aa5588] font-semibold text-xs border border-[#edd5e3] hover:bg-[#f6e8f1] transition-colors cursor-pointer"
+              className="mt-4 px-4 py-2 rounded-xl bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] font-semibold text-xs border border-[#edd5e3] dark:border-pink-900/60 hover:bg-[#f6e8f1] dark:hover:bg-pink-950/60 transition-colors cursor-pointer"
             >
               Reset Filters
             </button>

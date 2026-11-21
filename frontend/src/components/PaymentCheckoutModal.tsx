@@ -252,8 +252,8 @@ export default function PaymentCheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white dark:bg-[#111726] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-8">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white">
           <div className="flex items-center gap-2">
@@ -271,17 +271,17 @@ export default function PaymentCheckoutModal({
 
         <div className="p-6 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto">
           {/* Order Summary Card */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 space-y-3">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                   Consultation Booking
                 </span>
-                <h3 className="font-bold text-slate-900 text-base">{doctorName}</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">{doctorName}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {specialtyName || 'Specialist Consultation'} · {branchName || 'MundulCare'}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-slate-600 mt-1 font-tabular">
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 mt-1 font-tabular">
                   <span>{appointmentDate}</span>
                   <span>•</span>
                   <span>{startTime}</span>
@@ -289,18 +289,18 @@ export default function PaymentCheckoutModal({
               </div>
 
               <div className="text-right">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Amount Due</span>
-                <div className="text-2xl font-black text-[#aa5588] font-tabular">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Amount Due</span>
+                <div className="text-2xl font-black text-[#aa5588] dark:text-[#dd99bb] font-tabular">
                   ${fee.toFixed(2)}
                 </div>
-                <span className="text-[10px] text-slate-400 uppercase">USD / KHR Equiv.</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">USD / KHR Equiv.</span>
               </div>
             </div>
           </div>
 
           {/* Payment Method Selector */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5">
               Select Payment Method
             </label>
             <div className="grid grid-cols-3 gap-2.5">
@@ -310,15 +310,15 @@ export default function PaymentCheckoutModal({
                 onClick={() => setSelectedMethod('KHQR')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
                   selectedMethod === 'KHQR'
-                    ? 'border-[#aa5588] bg-[#fbf5f8] text-[#aa5588] ring-2 ring-[#aa5588]/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
+                    ? 'border-[#aa5588] dark:border-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] ring-2 ring-[#aa5588]/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-300'
                 }`}
               >
                 <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-xs shadow-xs mb-1.5">
                   KHQR
                 </div>
                 <span className="font-bold text-xs">Bakong KHQR</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">ABA, Wing, ACLEDA</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">ABA, Wing, ACLEDA</span>
               </button>
 
               {/* Credit / Debit Card */}
@@ -327,15 +327,15 @@ export default function PaymentCheckoutModal({
                 onClick={() => setSelectedMethod('CREDIT_CARD')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
                   selectedMethod === 'CREDIT_CARD'
-                    ? 'border-[#aa5588] bg-[#fbf5f8] text-[#aa5588] ring-2 ring-[#aa5588]/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
+                    ? 'border-[#aa5588] dark:border-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] ring-2 ring-[#aa5588]/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-300'
                 }`}
               >
                 <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs mb-1.5">
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <span className="font-bold text-xs">Card Payment</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">Visa, Mastercard</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Visa, Mastercard</span>
               </button>
 
               {/* Pay at Clinic */}
@@ -344,22 +344,22 @@ export default function PaymentCheckoutModal({
                 onClick={() => setSelectedMethod('CASH')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
                   selectedMethod === 'CASH'
-                    ? 'border-[#aa5588] bg-[#fbf5f8] text-[#aa5588] ring-2 ring-[#aa5588]/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
+                    ? 'border-[#aa5588] dark:border-[#dd99bb] bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] ring-2 ring-[#aa5588]/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-300'
                 }`}
               >
-                <div className="w-9 h-9 rounded-xl bg-slate-700 text-white flex items-center justify-center shadow-xs mb-1.5">
+                <div className="w-9 h-9 rounded-xl bg-slate-700 dark:bg-slate-700 text-white flex items-center justify-center shadow-xs mb-1.5">
                   <Building className="w-5 h-5" />
                 </div>
                 <span className="font-bold text-xs">Pay at Clinic</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">Cash / Counter</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Cash / Counter</span>
               </button>
             </div>
           </div>
 
           {/* Genuine NBC Bakong KHQR UI */}
           {selectedMethod === 'KHQR' && (
-            <div className="p-5 rounded-3xl bg-linear-to-b from-red-50/70 via-white to-slate-50 border border-red-200/80 flex flex-col items-center text-center space-y-4">
+            <div className="p-5 rounded-3xl bg-linear-to-b from-red-50/70 via-white to-slate-50 dark:from-red-950/20 dark:via-slate-900 dark:to-slate-900 border border-red-200/80 dark:border-red-900/50 flex flex-col items-center text-center space-y-4">
               {/* Bakong KHQR Header Banner */}
               <div className="w-full max-w-xs bg-red-600 text-white rounded-xl py-1.5 px-4 flex items-center justify-between shadow-xs">
                 <span className="font-black text-sm tracking-widest">KHQR</span>
@@ -368,13 +368,13 @@ export default function PaymentCheckoutModal({
 
               {/* Dynamic QR Display or Loader */}
               {loadingQr ? (
-                <div className="w-56 h-56 bg-white p-4 rounded-2xl border-2 border-red-400 shadow-md flex flex-col items-center justify-center text-slate-400">
+                <div className="w-56 h-56 bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-red-400 shadow-md flex flex-col items-center justify-center text-slate-400">
                   <Loader2 className="w-8 h-8 animate-spin text-red-600 mb-2" />
                   <span className="text-xs font-semibold">Generating Dynamic KHQR...</span>
                 </div>
               ) : qrError ? (
-                <div className="w-full max-w-sm p-4 rounded-2xl bg-red-50 border border-red-200 text-left text-xs text-red-700 space-y-2">
-                  <div className="font-bold flex items-center gap-1.5 text-red-800">
+                <div className="w-full max-w-sm p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-left text-xs text-red-700 dark:text-red-300 space-y-2">
+                  <div className="font-bold flex items-center gap-1.5 text-red-800 dark:text-red-200">
                     <AlertCircle className="w-4 h-4 text-red-600" />
                     <span>KHQR Generation Note</span>
                   </div>
@@ -410,17 +410,17 @@ export default function PaymentCheckoutModal({
 
               {/* Merchant & Countdown Info */}
               <div className="space-y-1">
-                <div className="font-extrabold text-sm text-slate-900">MundulCare Health System</div>
-                <div className="text-xs text-slate-500">
+                <div className="font-extrabold text-sm text-slate-900 dark:text-white">MundulCare Health System</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
                   Scan with Bakong, ABA Mobile, Wing, ACLEDA, or any KHQR banking app
                 </div>
-                <div className="text-sm font-mono font-black text-red-600 pt-0.5">
+                <div className="text-sm font-mono font-black text-red-600 dark:text-red-400 pt-0.5">
                   ${fee.toFixed(2)} USD
                 </div>
 
                 {/* Live Validity Countdown */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-[11px] font-mono font-bold text-slate-700 mt-2">
-                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-200 mt-2">
+                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Valid for: {formatCountdown(secondsRemaining)}</span>
                 </div>
               </div>
@@ -431,7 +431,7 @@ export default function PaymentCheckoutModal({
                   <button
                     type="button"
                     onClick={handleCopyKhqr}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-semibold shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5 text-slate-400" />
                     <span>{copied ? 'Copied!' : 'Copy KHQR'}</span>
@@ -497,25 +497,25 @@ export default function PaymentCheckoutModal({
           {selectedMethod === 'CREDIT_CARD' && (
             <div className="space-y-3.5">
               {cardError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2 text-xs text-rose-700">
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-center gap-2 text-xs text-rose-700 dark:text-rose-300">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                   <span>{cardError}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Cardholder Name</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cardholder Name</label>
                 <input
                   type="text"
                   placeholder="e.g. SOK CHANTHA"
                   value={cardHolder}
                   onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#aa5588]"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-hidden focus:border-[#aa5588]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Card Number</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Card Number</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -527,7 +527,7 @@ export default function PaymentCheckoutModal({
                       const parts = v.match(/.{1,4}/g);
                       setCardNumber(parts ? parts.join(' ') : v);
                     }}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#aa5588] font-mono"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-hidden focus:border-[#aa5588] font-mono"
                   />
                   <CreditCard className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
                 </div>
@@ -535,7 +535,7 @@ export default function PaymentCheckoutModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Expiry (MM/YY)</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Expiry (MM/YY)</label>
                   <input
                     type="text"
                     maxLength={5}
@@ -546,18 +546,18 @@ export default function PaymentCheckoutModal({
                       if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2);
                       setCardExpiry(v);
                     }}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#aa5588] font-mono text-center"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-hidden focus:border-[#aa5588] font-mono text-center"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">CVV / CVC</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">CVV / CVC</label>
                   <input
                     type="password"
                     maxLength={4}
                     placeholder="123"
                     value={cardCvv}
                     onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#aa5588] font-mono text-center"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-hidden focus:border-[#aa5588] font-mono text-center"
                   />
                 </div>
               </div>
@@ -577,8 +577,8 @@ export default function PaymentCheckoutModal({
           {/* Pay at Clinic Notice */}
           {selectedMethod === 'CASH' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-800 space-y-2">
-                <div className="font-bold flex items-center gap-1.5 text-amber-900">
+              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 text-xs text-amber-800 dark:text-amber-200 space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-100">
                   <Clock className="w-4 h-4" />
                   <span>Pay at the Hospital Reception Desk</span>
                 </div>
