@@ -62,7 +62,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col selection:bg-[#aa5588] selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-[#aa5588] selection:text-white transition-colors duration-200">
       <Navbar />
 
       {/* 1. Hero Section - Full-Screen Hospital Banner */}
@@ -155,19 +155,19 @@ export default function HomePage() {
       <AiSymptomAssistant />
 
       {/* 3. Verified Specialists (Featured Doctors) */}
-      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80">
+      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80 dark:border-slate-800/80">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
           <div>
-            <span className="text-xs font-bold text-[#aa5588] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#aa5588] dark:text-[#dd99bb] uppercase tracking-wider">
               Verified Specialists
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
               Featured Hospital Physicians
             </h2>
           </div>
           <Link
             href="/doctors"
-            className="text-xs sm:text-sm font-semibold text-[#aa5588] hover:text-[#924472] hover:underline inline-flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-semibold text-[#aa5588] dark:text-[#dd99bb] hover:text-[#924472] dark:hover:text-[#f3c5dc] hover:underline inline-flex items-center gap-1 transition-colors"
           >
             <span>Browse All Doctors</span>
             <ArrowRight className="w-4 h-4" />
@@ -179,7 +179,7 @@ export default function HomePage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-64 rounded-2xl bg-white border border-slate-200/70 animate-pulse"
+                className="h-64 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/70 dark:border-slate-800 animate-pulse"
               />
             ))}
           </div>
@@ -190,27 +190,27 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
+          <div className="text-center py-12 bg-white dark:bg-[#111726] rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm">
             No doctors found. Please ensure backend is running.
           </div>
         )}
       </section>
 
       {/* 4. Departments (Explore by Medical Specialty) */}
-      <section className="py-14 bg-white border-y border-slate-200/80">
+      <section className="py-14 bg-white dark:bg-[#0e1422] border-y border-slate-200/80 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
             <div>
-              <span className="text-xs font-bold text-[#aa5588] uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#aa5588] dark:text-[#dd99bb] uppercase tracking-wider">
                 Departments
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
                 Explore by Medical Specialty
               </h2>
             </div>
             <Link
               href="/doctors"
-              className="text-xs sm:text-sm font-semibold text-[#aa5588] hover:text-[#924472] hover:underline inline-flex items-center gap-1 transition-colors"
+              className="text-xs sm:text-sm font-semibold text-[#aa5588] dark:text-[#dd99bb] hover:text-[#924472] dark:hover:text-[#f3c5dc] hover:underline inline-flex items-center gap-1 transition-colors"
             >
               <span>View All Specialists</span>
               <ArrowRight className="w-4 h-4" />
@@ -228,25 +228,25 @@ export default function HomePage() {
                 <Link
                   key={spec.id}
                   href={`/doctors?specialtyId=${spec.id}`}
-                  className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-[#aa5588]/40 hover:bg-[#fbf5f8]/50 transition-all group flex flex-col justify-between"
+                  className="p-5 rounded-2xl bg-slate-50/70 dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 hover:border-[#aa5588]/40 dark:hover:border-[#dd99bb]/40 hover:bg-[#fbf5f8]/50 dark:hover:bg-slate-800/80 transition-all group flex flex-col justify-between"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-[#aa5588] flex items-center justify-center mb-3 shadow-2xs group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#aa5588] dark:text-[#dd99bb] flex items-center justify-center mb-3 shadow-2xs group-hover:scale-105 transition-transform">
                       <IconComponent className="w-5 h-5" />
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#aa5588] transition-colors">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#aa5588] dark:group-hover:text-[#dd99bb] transition-colors">
                       {spec.name}
                     </h3>
                     {spec.description && (
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                         {spec.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                     <span>{doctorCount} {doctorCount === 1 ? 'specialist' : 'specialists'}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#aa5588] group-hover:translate-x-0.5 transition-all" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover:text-[#aa5588] dark:group-hover:text-[#dd99bb] group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
               );
@@ -256,58 +256,58 @@ export default function HomePage() {
       </section>
 
       {/* 5. Clinical Standards (Hospital Facilities) */}
-      <section className="py-14 bg-slate-50/60 border-b border-slate-200/80">
+      <section className="py-14 bg-slate-50/60 dark:bg-[#0B0F19] border-b border-slate-200/80 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold text-[#aa5588] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#aa5588] dark:text-[#dd99bb] uppercase tracking-wider">
               Clinical Standards
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
               State-of-the-Art Hospital Facilities
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-2">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Designed to provide high-standard clinical care, privacy, and seamless consultation workflows.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs group">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#111726] shadow-xs dark:shadow-none group">
               <img
                 src={HOSPITAL_IMAGES.heroLobby}
                 alt="Reception & Check-In"
                 className="w-full h-48 object-cover group-hover:scale-102 transition-transform duration-200"
               />
               <div className="p-5">
-                <h3 className="font-bold text-slate-900 text-sm">Welcoming Reception & Check-In</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Welcoming Reception & Check-In</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                   A dedicated front-desk team greets every patient, verifies appointment details, and guides you to the right department with minimal wait time.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs group">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#111726] shadow-xs dark:shadow-none group">
               <img
                 src={HOSPITAL_IMAGES.diagnosticsLab}
                 alt="Diagnostic Labs"
                 className="w-full h-48 object-cover group-hover:scale-102 transition-transform duration-200"
               />
               <div className="p-5">
-                <h3 className="font-bold text-slate-900 text-sm">Rapid Diagnostics Lab</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Rapid Diagnostics Lab</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                   On-site clinical diagnostics ensuring timely evaluations and treatment decisions.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs group">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#111726] shadow-xs dark:shadow-none group">
               <img
                 src={HOSPITAL_IMAGES.medicalCareCenter}
                 alt="Continuous Care"
                 className="w-full h-48 object-cover group-hover:scale-102 transition-transform duration-200"
               />
               <div className="p-5">
-                <h3 className="font-bold text-slate-900 text-sm">24/7 Coordinated Care</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">24/7 Coordinated Care</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                   Seamless appointment scheduling, email confirmation receipts, and continuous specialist access.
                 </p>
               </div>
@@ -317,25 +317,25 @@ export default function HomePage() {
       </section>
 
       {/* 6. Minimalist Footer */}
-      <footer className="bg-white py-8 mt-auto border-t border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <footer className="bg-white dark:bg-[#0e1422] py-8 mt-auto border-t border-slate-200/60 dark:border-slate-800 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2.5">
             <img src="/logo.png" alt="Mundul Care Logo" className="w-5 h-5 object-contain" />
-            <span className="font-bold text-slate-900">Mundul Care</span>
+            <span className="font-bold text-slate-900 dark:text-white">Mundul Care</span>
             <span>•</span>
             <span>Appointment & Specialist Management</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/doctors" className="hover:text-[#aa5588] transition-colors">
+          <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+            <Link href="/doctors" className="hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors">
               Specialist Directory
             </Link>
             <span>•</span>
-            <Link href="/queue" className="hover:text-[#aa5588] transition-colors">
+            <Link href="/queue" className="hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors">
               Live Waiting Queue
             </Link>
             <span>•</span>
-            <div className="flex items-center gap-1.5 text-[#aa5588] font-semibold">
+            <div className="flex items-center gap-1.5 text-[#aa5588] dark:text-[#dd99bb] font-semibold">
               <PhoneCall className="w-3.5 h-3.5" />
               <span>Hotline: +855 12 999 888</span>
             </div>

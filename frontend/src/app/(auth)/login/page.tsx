@@ -53,16 +53,16 @@ function LoginPageContent() {
   return (
     <div>
       <div className="mb-6 text-center">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Welcome Back</h1>
-        <p className="text-xs text-slate-500 mt-1">Sign in to manage your medical consultations</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome Back</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Sign in to manage your medical consultations</p>
       </div>
 
       {isBookingRedirect && (
-        <div className="mb-5 p-3.5 rounded-xl bg-[#fbf5f8] border border-[#edd5e3] text-xs text-[#aa5588]">
+        <div className="mb-5 p-3.5 rounded-xl bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60 text-xs text-[#aa5588] dark:text-[#dd99bb]">
           <div className="flex items-start gap-2.5">
-            <Calendar className="w-4 h-4 text-[#aa5588] shrink-0 mt-0.5" />
+            <Calendar className="w-4 h-4 text-[#aa5588] dark:text-[#dd99bb] shrink-0 mt-0.5" />
             <div className="leading-relaxed">
-              <strong className="font-bold text-slate-800">Finalizing Your Appointment:</strong>{' '}
+              <strong className="font-bold text-slate-800 dark:text-white">Finalizing Your Appointment:</strong>{' '}
               Sign in or create an account to confirm your consultation. Your selected time slot, symptoms, and notes are saved.
             </div>
           </div>
@@ -70,7 +70,7 @@ function LoginPageContent() {
       )}
 
       {sessionExpired && (
-        <div className="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-xs text-amber-700">
+        <div className="mb-5 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-xs text-amber-700 dark:text-amber-300">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
             <span className="font-medium">Your session has expired. Please sign in again to continue.</span>
@@ -79,7 +79,7 @@ function LoginPageContent() {
       )}
 
       {error && (
-        <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200/80 text-xs text-red-700">
+        <div className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200/80 dark:border-red-900/60 text-xs text-red-700 dark:text-red-300">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
             <span className="font-medium">{error}</span>
@@ -88,7 +88,7 @@ function LoginPageContent() {
             <div className="mt-2 pl-6">
               <Link
                 href={`/verify-email?email=${encodeURIComponent(formData.email)}`}
-                className="text-xs font-semibold text-[#aa5588] underline hover:text-[#924472]"
+                className="text-xs font-semibold text-[#aa5588] dark:text-[#dd99bb] underline hover:text-[#924472]"
               >
                 Click here to verify your account &rarr;
               </Link>
@@ -99,48 +99,48 @@ function LoginPageContent() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             Email Address
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               required
               placeholder="you@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
             />
           </div>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium text-[#aa5588] hover:underline"
+              className="text-xs font-medium text-[#aa5588] dark:text-[#dd99bb] hover:underline"
             >
               Forgot password?
             </Link>
           </div>
           <div className="relative">
-            <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type={showPassword ? 'text' : 'password'}
               required
               placeholder="••••••••"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -165,21 +165,21 @@ function LoginPageContent() {
 
       <GoogleSignInButton />
 
-      <div className="mt-6 text-center text-xs text-slate-500">
+      <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         Don&apos;t have an account?{' '}
         <Link
           href={redirectParam ? `/register?redirect=${encodeURIComponent(redirectParam)}` : '/register'}
-          className="font-semibold text-[#aa5588] hover:underline"
+          className="font-semibold text-[#aa5588] dark:text-[#dd99bb] hover:underline"
         >
           Create account
         </Link>
       </div>
 
       {/* Guest Escape Hatch: Return to Hospital Exploration */}
-      <div className="mt-5 pt-4 border-t border-slate-100 text-center">
+      <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center">
         <Link
           href="/doctors"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#aa5588] transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-[#aa5588] dark:hover:text-[#dd99bb] transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Explore Hospital & Doctors as Guest</span>

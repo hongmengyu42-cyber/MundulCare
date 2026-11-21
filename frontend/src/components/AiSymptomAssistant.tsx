@@ -79,15 +79,15 @@ export default function AiSymptomAssistant() {
     <section id="ai-assistant" className="py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
       {/* Title & Subtitle */}
       <div className="text-center mb-8">
-        <div className="relative overflow-hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#fbf5f8] border border-[#edd5e3] text-[#aa5588] text-xs font-semibold mb-3 shadow-2xs">
+        <div className="relative overflow-hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60 text-[#aa5588] dark:text-[#dd99bb] text-xs font-semibold mb-3 shadow-2xs">
           <span className="ai-shimmer absolute inset-0" aria-hidden="true" />
-          <Sparkles className="relative w-3.5 h-3.5 text-[#aa5588]" />
+          <Sparkles className="relative w-3.5 h-3.5 text-[#aa5588] dark:text-[#dd99bb]" />
           <span className="relative">Smart Clinical Triaging</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Not Sure Which Doctor to See?
         </h2>
-        <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto mt-2 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mt-2 leading-relaxed">
           Describe your symptoms in your own words. Our medical AI will analyze your description and match you with the appropriate hospital specialist at your nearest branch.
         </p>
       </div>
@@ -97,11 +97,11 @@ export default function AiSymptomAssistant() {
         <div className="ai-card-glow absolute -inset-4 rounded-4xl pointer-events-none" aria-hidden="true" />
         <div className="ai-card-shadow absolute -bottom-4 left-1/2 w-4/5 h-6 bg-slate-900/30 rounded-full blur-xl pointer-events-none" aria-hidden="true" />
 
-        <div className="ai-card-float relative bg-white rounded-2xl border border-slate-200/90 shadow-lg p-5 sm:p-7">
+        <div className="ai-card-float relative bg-white dark:bg-[#111726] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-lg dark:shadow-none p-5 sm:p-7 transition-colors">
           {/* Patient Location Context & Nearest Branch Targeting */}
-          <div className="mb-4 pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-7 h-7 rounded-lg bg-[#fbf5f8] border border-[#edd5e3] flex items-center justify-center text-[#aa5588] shrink-0">
+              <span className="w-7 h-7 rounded-lg bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60 flex items-center justify-center text-[#aa5588] dark:text-[#dd99bb] shrink-0">
                 <MapPin className="w-3.5 h-3.5" />
               </span>
               <div className="min-w-0">
@@ -109,14 +109,14 @@ export default function AiSymptomAssistant() {
                   Patient Location (Nearest Branch Scope)
                 </span>
                 {activeBranchName ? (
-                  <p className="font-bold text-slate-800 truncate">
+                  <p className="font-bold text-slate-800 dark:text-slate-200 truncate">
                     Filtered for{' '}
-                    <span className="text-[#aa5588] font-extrabold">{selectedProvince}</span>{' '}
+                    <span className="text-[#aa5588] dark:text-[#dd99bb] font-extrabold">{selectedProvince}</span>{' '}
                     → Doctors strictly at{' '}
-                    <span className="text-slate-900 font-extrabold">{activeBranchName}</span>
+                    <span className="text-slate-900 dark:text-white font-extrabold">{activeBranchName}</span>
                   </p>
                 ) : (
-                  <p className="text-slate-600">
+                  <p className="text-slate-600 dark:text-slate-400">
                     No province selected (Showing all branches)
                   </p>
                 )}
@@ -151,14 +151,14 @@ export default function AiSymptomAssistant() {
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
                 placeholder="e.g., I have had a sharp pain in my chest when taking deep breaths and dizziness for the past 2 days..."
-                className="w-full p-4 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all resize-none"
+                className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#aa5588]/20 focus:border-[#aa5588] transition-all resize-none"
               />
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {activeBranchName ? (
-                  <span className="inline-flex items-center gap-1.5 text-[#aa5588] font-semibold">
+                  <span className="inline-flex items-center gap-1.5 text-[#aa5588] dark:text-[#dd99bb] font-semibold">
                     <Compass className="w-3.5 h-3.5" />
                     Targeting nearest campus: {activeBranchName}
                   </span>
@@ -188,7 +188,7 @@ export default function AiSymptomAssistant() {
           </form>
 
           {/* Quick Suggestion Chips */}
-          <div className="mt-5 pt-4 border-t border-slate-100">
+          <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80">
             <span className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
               Common Inquiries:
             </span>
@@ -199,7 +199,7 @@ export default function AiSymptomAssistant() {
                   type="button"
                   onClick={() => handleChipClick(prompt)}
                   disabled={loading}
-                  className="px-3 py-1.5 rounded-lg bg-slate-50/70 hover:bg-[#fbf5f8] hover:text-[#aa5588] border border-slate-200 hover:border-[#edd5e3] text-slate-600 text-xs font-medium transition-colors text-left cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-slate-50/70 dark:bg-slate-800/80 hover:bg-[#fbf5f8] dark:hover:bg-slate-700 hover:text-[#aa5588] dark:hover:text-[#dd99bb] border border-slate-200 dark:border-slate-700 hover:border-[#edd5e3] dark:hover:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-medium transition-colors text-left cursor-pointer"
                 >
                   &ldquo;{prompt}&rdquo;
                 </button>
@@ -211,7 +211,7 @@ export default function AiSymptomAssistant() {
 
       {/* Error Message */}
       {error && (
-        <div className="mt-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 text-xs sm:text-sm text-red-700">
+        <div className="mt-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 flex items-start gap-3 text-xs sm:text-sm text-red-700 dark:text-red-300">
           <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -219,18 +219,18 @@ export default function AiSymptomAssistant() {
 
       {/* AI Results Section */}
       {result && (
-        <div className="mt-8 bg-white rounded-2xl border border-[#edd5e3] p-6 sm:p-8 shadow-xs">
+        <div className="mt-8 bg-white dark:bg-[#111726] rounded-2xl border border-[#edd5e3] dark:border-pink-900/50 p-6 sm:p-8 shadow-xs transition-colors">
           {/* Analysis Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-100">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800/80">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#fbf5f8] border border-[#edd5e3] text-[#aa5588] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[#fbf5f8] dark:bg-pink-950/40 border border-[#edd5e3] dark:border-pink-900/60 text-[#aa5588] dark:text-[#dd99bb] flex items-center justify-center">
                 <Stethoscope className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   Recommended Department
                 </span>
-                <h3 className="text-xl font-bold text-slate-900">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                   {result.detectedSpecialty}
                 </h3>
               </div>
@@ -238,12 +238,12 @@ export default function AiSymptomAssistant() {
 
             <div className="flex flex-wrap items-center gap-2">
               {result.recommendedBranch && (
-                <span className="px-3 py-1 rounded-full bg-[#f5f3ff] text-[#6D28D9] font-bold text-xs border border-[#ddd6fe] flex items-center gap-1.5">
+                <span className="px-3 py-1 rounded-full bg-[#f5f3ff] dark:bg-purple-950/50 text-[#6D28D9] dark:text-purple-300 font-bold text-xs border border-[#ddd6fe] dark:border-purple-900/60 flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5" />
                   {result.recommendedBranch}
                 </span>
               )}
-              <span className="px-3 py-1 rounded-full bg-[#fbf5f8] text-[#aa5588] font-semibold text-xs border border-[#edd5e3] flex items-center gap-1">
+              <span className="px-3 py-1 rounded-full bg-[#fbf5f8] dark:bg-pink-950/40 text-[#aa5588] dark:text-[#dd99bb] font-semibold text-xs border border-[#edd5e3] dark:border-pink-900/60 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Specialist Match Found
               </span>
@@ -251,9 +251,9 @@ export default function AiSymptomAssistant() {
           </div>
 
           {/* Clinical Explanation */}
-          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-6">
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              <strong className="text-slate-900 font-semibold">Clinical Note: </strong>
+          <div className="bg-slate-50 dark:bg-slate-900/80 rounded-xl p-4 border border-slate-200 dark:border-slate-800 mb-6">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              <strong className="text-slate-900 dark:text-white font-semibold">Clinical Note: </strong>
               {result.clinicalExplanation}
             </p>
           </div>
@@ -262,18 +262,18 @@ export default function AiSymptomAssistant() {
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                   Available Specialists for {result.detectedSpecialty}
                 </h4>
                 {result.recommendedBranch && (
-                  <p className="text-xs text-[#aa5588] font-semibold mt-0.5">
+                  <p className="text-xs text-[#aa5588] dark:text-[#dd99bb] font-semibold mt-0.5">
                     Showing doctors practicing at{' '}
                     <strong>{result.recommendedBranch}</strong>
                     {result.userProvince ? ` (Nearest to ${result.userProvince})` : ''}
                   </p>
                 )}
               </div>
-              <span className="text-xs text-slate-500 font-medium">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 {result.matchingDoctors.length}{' '}
                 {result.matchingDoctors.length === 1 ? 'specialist' : 'specialists'}{' '}
                 available
@@ -294,8 +294,8 @@ export default function AiSymptomAssistant() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-200 text-slate-500 text-xs space-y-1">
-                <p className="font-semibold text-slate-700">
+              <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs space-y-1">
+                <p className="font-semibold text-slate-700 dark:text-slate-300">
                   No active doctors currently practicing at {result.recommendedBranch || 'this location'}.
                 </p>
                 <p>Please check our other MundulCare hospital campuses or consult our 24/7 helpline.</p>
